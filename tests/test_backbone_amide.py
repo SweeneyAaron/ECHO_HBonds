@@ -21,6 +21,7 @@ from HBOND_CHEMEM.backbone_amide import (
 )
 from HBOND_CHEMEM.environment_context import CONTEXT_FIELDS
 from HBOND_CHEMEM.pdb_io import find_backbone_donors, parse_pdb
+from HBOND_CHEMEM.protein_hbond_typing import parse_atom_selector
 from HBOND_CHEMEM.reference_hbond_score import eval_poly, load_tables
 from HBOND_CHEMEM.score_bounds import load_score_bounds, normalize_hbond_score
 
@@ -227,8 +228,9 @@ class BackboneAmideTests(unittest.TestCase):
         self.assertEqual(len(n_hbonds), 1)
         self.assertEqual(n_hbonds[0].donor.name, "N")
         self.assertNotIn(("OG", "OD1"), {(h.donor.name, h.acceptor.name) for h in n_hbonds})
-        self.assertIn(("OG", "OD1"), {(h.donor.name, h.acceptor.name) for h in o_hbonds})
-        self.assertEqual(len(n_o_hbonds), 2)
+        self.assertNotIn(("OG", "OD1"), {(h.donor.name, h.acceptor.name) for h in o_hbonds})
+        self.assertEqual([(h.donor.name, h.acceptor.name) for h in o_hbonds], [("N", "O")])
+        self.assertEqual(len(n_o_hbonds), 1)
         self.assertEqual(len(all_hbonds), 2)
         self.assertEqual(len(wildcard_hbonds), 2)
         self.assertEqual([(h.donor.name, h.acceptor.name) for h in ser_og_hbonds], [("OG", "OD1")])
@@ -237,6 +239,23 @@ class BackboneAmideTests(unittest.TestCase):
         for hbond in all_hbonds:
             self.assertGreaterEqual(hbond.normalized_score, 0.0)
             self.assertLessEqual(hbond.normalized_score, 1.0)
+
+    def test_bare_atom_selector_matches_atom_name_not_element(self) -> None:
+        structure = parse_pdb(
+            write_temp_pdb(
+                [
+                    pdb_atom(1, "NZ", "LYS", "A", 1, 0.0, 0.0, 0.0, "N"),
+                    pdb_atom(2, "O", "GLY", "A", 2, 2.8, 0.0, 0.0, "O"),
+                ]
+            )
+        )
+        nz_atom = structure.atoms[0]
+        o_atom = structure.atoms[1]
+
+        self.assertFalse(parse_atom_selector("N").matches(nz_atom, 13))
+        self.assertFalse(parse_atom_selector("O").matches(nz_atom, 13))
+        self.assertTrue(parse_atom_selector("NZ").matches(nz_atom, 13))
+        self.assertTrue(parse_atom_selector("O").matches(o_atom, 39))
 
     def test_cli_style_outputs_have_matching_json_and_csv_rows(self) -> None:
         input_path = write_temp_pdb(

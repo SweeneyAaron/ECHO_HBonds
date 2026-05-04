@@ -14,12 +14,14 @@ HBond polynomial scoring functions. It writes one JSON file and one CSV file
 containing atom identifiers, HBond geometry, uncapped ChemEM HBond scores, and
 fast local environment descriptors for downstream HDX correlation analysis.
 
-By default, the scorer reports HBonds where a nitrogen atom participates as
-either donor or acceptor. The selector can be expanded to oxygen, sulfur,
-specific PDB atom names, residue-qualified atom names, ChemEM type IDs, or all
-detected protein HBonds. Waters and ligands are ignored. There is no
-sequence-separation or residue-locality filter: every typed donor/acceptor pair
-can score if it passes the ChemEM distance and angle cutoffs.
+By default, the scorer reports HBonds where an atom named `N` participates as
+either donor or acceptor. Bare selector tokens are strict PDB atom-name matches,
+not element matches, so `N` means atom name `N` rather than every nitrogen atom.
+The selector can be expanded to other PDB atom names, residue-qualified atom
+names, ChemEM type IDs, or all detected protein HBonds. Waters and ligands are
+ignored. There is no sequence-separation or residue-locality filter: every typed
+donor/acceptor pair can score if it passes the ChemEM distance and angle
+cutoffs.
 
 ## Environment
 
@@ -148,11 +150,11 @@ amide side-chain `N = 43`, amide side-chain `O = 38`, generic/charged
 `O = 19`, aromatic/generic nitrogen types, and `S = 24`.
 
 `--atom-types` filters scored HBonds after donor/acceptor typing. A row is
-reported when the selected atom participates on either side of the HBond.
-Examples:
+reported when the selected atom participates on either side of the HBond. Bare
+text selectors are strict PDB atom-name matches. Examples:
 
-- `N`: all HBonds involving nitrogen atoms;
-- `N,O`: all HBonds involving nitrogen or oxygen atoms;
+- `N`: all HBonds involving atoms named `N`;
+- `N,O`: all HBonds involving atoms named `N` or `O`;
 - `NZ` or `OG`: all HBonds involving those PDB atom names;
 - `SER:OG`: all HBonds involving that residue-qualified atom name;
 - `40`: all HBonds involving ChemEM type ID `40`;

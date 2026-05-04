@@ -50,7 +50,7 @@ class SelectorTerm:
             )
         if self.token is None:
             return False
-        return atom.element.upper() == self.token or normalize_atom_name(atom.name) == self.token
+        return normalize_atom_name(atom.name) == self.token
 
 
 @dataclass(frozen=True)
