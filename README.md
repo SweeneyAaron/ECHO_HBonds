@@ -108,6 +108,14 @@ requests above the available CPU count are accepted and capped internally; the
 JSON metadata records the requested worker count and the effective score/context
 worker counts used for the run.
 
+The donor-acceptor heavy-atom distance cutoff defaults to `3.5 A`. Candidate
+pairs at or above this distance are skipped before angle and score evaluation.
+To relax or tighten it:
+
+```bash
+python -m HBOND_CHEMEM score input.pdb --hbond-distance-cutoff 4.0 --json hbonds.json --csv hbonds.csv
+```
+
 Prepare a hydrogenated PDB first, then run the fast explicit-H scoring path:
 
 ```bash
@@ -153,7 +161,8 @@ text selectors are strict PDB atom-name matches. Examples:
 
 For each candidate pair, the scorer requires:
 
-- donor-acceptor heavy atom distance `< 6.0 A`;
+- donor-acceptor heavy atom distance below `--hbond-distance-cutoff`
+  (`3.5 A` by default);
 - best donor-H-acceptor angle `> 110.0 degrees`.
 
 The score is:

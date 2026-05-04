@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 import sys
 
 from .backbone_amide import score_pdb, write_csv, write_json
@@ -22,6 +23,7 @@ def main(argv: list[str] | None = None) -> int:
                 atom_types=args.atom_types,
                 context_mode=args.context_mode,
                 workers=args.workers,
+                distance_cutoff=args.hbond_distance_cutoff,
             )
             write_json(result, args.json)
             write_csv(result, args.csv)
@@ -100,6 +102,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=1,
         help="number of CPU worker processes for scoring/context work (default: 1)",
     )
+    score_parser.add_argument(
+        "--hbond-distance-cutoff",
+        type=_positive_float,
+        default=3.5,
+        help="maximum donor-acceptor heavy atom distance in Angstrom before scoring (default: 3.5)",
+    )
 
     prepare_parser = subparsers.add_parser(
         "prepare",
@@ -122,4 +130,14 @@ def _positive_int(value: str) -> int:
         raise argparse.ArgumentTypeError("must be a positive integer") from exc
     if parsed < 1:
         raise argparse.ArgumentTypeError("must be a positive integer")
+    return parsed
+
+
+def _positive_float(value: str) -> float:
+    try:
+        parsed = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("must be a positive number") from exc
+    if not math.isfinite(parsed) or parsed <= 0.0:
+        raise argparse.ArgumentTypeError("must be a positive number")
     return parsed

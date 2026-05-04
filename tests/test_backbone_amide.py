@@ -201,6 +201,23 @@ class BackboneAmideTests(unittest.TestCase):
         self.assertEqual(hbonds[0].acceptor.serial, 3)
         self.assertGreater(hbonds[0].dha_angle, 110.0)
 
+    def test_hbond_distance_cutoff_defaults_to_3p5_and_is_configurable(self) -> None:
+        path = write_temp_pdb(
+            [
+                pdb_atom(1, "N", "ALA", "A", 1, 0.0, 0.0, 0.0, "N"),
+                pdb_atom(2, "H", "ALA", "A", 1, 1.0, 0.0, 0.0, "H"),
+                pdb_atom(3, "O", "GLY", "A", 2, 4.0, 0.0, 0.0, "O"),
+            ]
+        )
+        structure = parse_pdb(path)
+
+        default_hbonds = score_structure(structure, context_mode="none")
+        relaxed_hbonds = score_structure(structure, context_mode="none", distance_cutoff=4.5)
+
+        self.assertEqual(default_hbonds, [])
+        self.assertEqual(len(relaxed_hbonds), 1)
+        self.assertAlmostEqual(relaxed_hbonds[0].donor_acceptor_distance, 4.0)
+
     def test_atom_selectors_filter_by_participating_atom(self) -> None:
         path = write_temp_pdb(
             [
@@ -407,6 +424,18 @@ class BackboneAmideTests(unittest.TestCase):
         self.assertGreaterEqual(data["metadata"]["workers"]["score"], 1)
         self.assertLessEqual(data["metadata"]["workers"]["score"], result.counts["donors"])
         self.assertEqual(data["metadata"]["workers"]["context"], 0)
+        self.assertEqual(data["metadata"]["distance_cutoff"], 3.5)
+
+    def test_custom_hbond_distance_cutoff_is_written_to_metadata(self) -> None:
+        result = score_pdb(
+            write_temp_pdb(two_hbond_lines()),
+            hydrogen_mode="explicit",
+            atom_types="ALL",
+            context_mode="none",
+            distance_cutoff=4.5,
+        )
+
+        self.assertEqual(result.to_json_dict()["metadata"]["distance_cutoff"], 4.5)
 
     def test_cli_workers_flag_writes_matching_outputs(self) -> None:
         input_path = write_temp_pdb(two_hbond_lines())
@@ -425,6 +454,8 @@ class BackboneAmideTests(unittest.TestCase):
                         "ALL",
                         "--workers",
                         "2",
+                        "--hbond-distance-cutoff",
+                        "4.5",
                         "--json",
                         str(json_path),
                         "--csv",
@@ -438,6 +469,7 @@ class BackboneAmideTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         self.assertEqual(data["metadata"]["workers"]["requested"], 2)
+        self.assertEqual(data["metadata"]["distance_cutoff"], 4.5)
         self.assertEqual(len(data["hbonds"]), len(rows))
         self.assertEqual(len(data["hbonds"]), 2)
 
@@ -459,6 +491,25 @@ class BackboneAmideTests(unittest.TestCase):
                 )
 
         self.assertIn("positive integer", stderr.getvalue())
+
+    def test_cli_rejects_invalid_hbond_distance_cutoff(self) -> None:
+        stderr = io.StringIO()
+        with self.assertRaises(SystemExit):
+            with contextlib.redirect_stderr(stderr):
+                build_parser().parse_args(
+                    [
+                        "score",
+                        "input.pdb",
+                        "--hbond-distance-cutoff",
+                        "0",
+                        "--json",
+                        "out.json",
+                        "--csv",
+                        "out.csv",
+                    ]
+                )
+
+        self.assertIn("positive number", stderr.getvalue())
 
     def test_explicit_scoring_smoke_stays_fast_for_sample_pdb(self) -> None:
         start = time.perf_counter()

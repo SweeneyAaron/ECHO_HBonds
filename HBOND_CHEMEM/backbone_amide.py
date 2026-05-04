@@ -38,7 +38,7 @@ from .reference_hbond_score import eval_poly, load_tables
 from .score_bounds import NORMALIZATION_MODE, load_score_bounds, normalize_hbond_score
 
 
-DISTANCE_CUTOFF = 6.0
+DISTANCE_CUTOFF = 3.5
 ANGLE_CUTOFF = 110.0
 
 CSV_FIELDS = [
@@ -159,6 +159,7 @@ class ScoreResult:
     requested_workers: int
     effective_score_workers: int
     effective_context_workers: int
+    distance_cutoff: float
     hbonds: list[ProteinHBond]
     counts: dict[str, int]
     timing_seconds: dict[str, float]
@@ -170,7 +171,7 @@ class ScoreResult:
                 "hydrogen_mode": self.hydrogen_mode,
                 "hydrogen_source": self.hydrogen_source,
                 "atom_types": self.atom_types,
-                "distance_cutoff": DISTANCE_CUTOFF,
+                "distance_cutoff": self.distance_cutoff,
                 "angle_cutoff": ANGLE_CUTOFF,
                 "donor_types": sorted({hbond.donor_type for hbond in self.hbonds}),
                 "acceptor_types": sorted({hbond.acceptor_type for hbond in self.hbonds}),
@@ -198,6 +199,7 @@ def score_pdb(
     atom_types: str | Sequence[str] | None = "N",
     context_mode: str = CONTEXT_MODE_FAST,
     workers: int = 1,
+    distance_cutoff: float = DISTANCE_CUTOFF,
 ) -> ScoreResult:
     """Load a PDB file, optionally add hydrogens, and score protein HBonds."""
 
@@ -205,6 +207,7 @@ def score_pdb(
         raise ValueError("hydrogen_mode must be one of: auto, explicit, pdbfixer")
     _validate_context_mode(context_mode)
     requested_workers = _validate_workers(workers)
+    distance_cutoff = _validate_positive_float(distance_cutoff, "distance_cutoff")
     selector = parse_atom_selector(atom_types)
 
     input_path = Path(input_path)
@@ -231,6 +234,7 @@ def score_pdb(
     hbonds, effective_score_workers = _score_structure_base_with_worker_count(
         structure,
         atom_types=selector.raw,
+        distance_cutoff=distance_cutoff,
         workers=requested_workers,
     )
     score_seconds = time.perf_counter() - score_start
@@ -276,6 +280,7 @@ def score_pdb(
         requested_workers=requested_workers,
         effective_score_workers=effective_score_workers,
         effective_context_workers=effective_context_workers,
+        distance_cutoff=distance_cutoff,
         hbonds=hbonds,
         counts=counts,
         timing_seconds=timing,
@@ -295,6 +300,7 @@ def score_structure(
 
     _validate_context_mode(context_mode)
     requested_workers = _validate_workers(workers)
+    distance_cutoff = _validate_positive_float(distance_cutoff, "distance_cutoff")
     hbonds = _score_structure_base(
         structure,
         atom_types=atom_types,
@@ -337,6 +343,7 @@ def _score_structure_base_with_worker_count(
 ) -> tuple[list[ProteinHBond], int]:
     """Score protein HBonds and report the effective worker count used."""
 
+    distance_cutoff = _validate_positive_float(distance_cutoff, "distance_cutoff")
     selector = parse_atom_selector(atom_types)
     tables = load_tables()
     score_bounds = load_score_bounds()
@@ -552,6 +559,16 @@ def _validate_workers(workers: int) -> int:
     if value < 1:
         raise ValueError("workers must be a positive integer")
     return value
+
+
+def _validate_positive_float(value: float, name: str) -> float:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{name} must be a positive number") from exc
+    if not math.isfinite(parsed) or parsed <= 0.0:
+        raise ValueError(f"{name} must be a positive number")
+    return parsed
 
 
 def _effective_worker_count(requested_workers: int, item_count: int) -> int:
