@@ -1,0 +1,1174 @@
+{
+  "domain": {
+    "angle_cutoff_degrees": 110.0,
+    "angle_max_degrees": 180.0,
+    "angle_min_degrees": 110.000001,
+    "distance_clamp_angstrom": 2.0,
+    "distance_cutoff_angstrom": 6.0,
+    "distance_max_angstrom": 5.999999,
+    "distance_min_angstrom": 2.0
+  },
+  "normalization_mode": "favorable_strength",
+  "pairs": {
+    "13": {
+      "13": {
+        "angle_at_strongest_favorable": 179.592727916341,
+        "distance_at_strongest_favorable": 3.373323605098453,
+        "max_favorable_magnitude": 2.880417856537365,
+        "strongest_favorable_energy": -2.880417856537365
+      },
+      "14": {
+        "angle_at_strongest_favorable": 179.99999999999835,
+        "distance_at_strongest_favorable": 3.3281540078883998,
+        "max_favorable_magnitude": 3.14055464264559,
+        "strongest_favorable_energy": -3.14055464264559
+      },
+      "15": {
+        "angle_at_strongest_favorable": 173.04069318463752,
+        "distance_at_strongest_favorable": 3.3411806510022215,
+        "max_favorable_magnitude": 2.9470778999786296,
+        "strongest_favorable_energy": -2.9470778999786296
+      },
+      "16": {
+        "angle_at_strongest_favorable": 174.25043993646915,
+        "distance_at_strongest_favorable": 3.3905556320236663,
+        "max_favorable_magnitude": 2.636574778851756,
+        "strongest_favorable_energy": -2.636574778851756
+      },
+      "17": {
+        "angle_at_strongest_favorable": 179.10861254363851,
+        "distance_at_strongest_favorable": 3.4812313180397023,
+        "max_favorable_magnitude": 1.9725991397488407,
+        "strongest_favorable_energy": -1.9725991397488407
+      },
+      "18": {
+        "angle_at_strongest_favorable": 177.06314557330097,
+        "distance_at_strongest_favorable": 3.2717925941290185,
+        "max_favorable_magnitude": 3.6390153714132687,
+        "strongest_favorable_energy": -3.6390153714132687
+      },
+      "19": {
+        "angle_at_strongest_favorable": 179.99999999999318,
+        "distance_at_strongest_favorable": 3.2903248245491596,
+        "max_favorable_magnitude": 2.352242444734337,
+        "strongest_favorable_energy": -2.352242444734337
+      },
+      "20": {
+        "angle_at_strongest_favorable": 171.43590800579437,
+        "distance_at_strongest_favorable": 3.418204598287086,
+        "max_favorable_magnitude": 1.5487376632241663,
+        "strongest_favorable_energy": -1.5487376632241663
+      },
+      "21": {
+        "angle_at_strongest_favorable": 179.99999999999864,
+        "distance_at_strongest_favorable": 3.4049260843031446,
+        "max_favorable_magnitude": 1.7451958819126645,
+        "strongest_favorable_energy": -1.7451958819126645
+      },
+      "22": {
+        "angle_at_strongest_favorable": 179.99999999998738,
+        "distance_at_strongest_favorable": 3.2295576585793606,
+        "max_favorable_magnitude": 2.732525724705596,
+        "strongest_favorable_energy": -2.732525724705596
+      },
+      "23": {
+        "angle_at_strongest_favorable": 169.20410775125134,
+        "distance_at_strongest_favorable": 3.9807030132116683,
+        "max_favorable_magnitude": 1.683060993710014,
+        "strongest_favorable_energy": -1.683060993710014
+      },
+      "24": {
+        "angle_at_strongest_favorable": 179.99999999999915,
+        "distance_at_strongest_favorable": 3.900501043579095,
+        "max_favorable_magnitude": 1.116697143301855,
+        "strongest_favorable_energy": -1.116697143301855
+      },
+      "25": {
+        "angle_at_strongest_favorable": 170.44923752987393,
+        "distance_at_strongest_favorable": 3.9886251210952643,
+        "max_favorable_magnitude": 0.7560722480868893,
+        "strongest_favorable_energy": -0.7560722480868893
+      },
+      "26": {
+        "angle_at_strongest_favorable": 122.48365475037346,
+        "distance_at_strongest_favorable": 3.7295201048744913,
+        "max_favorable_magnitude": 0.5826707357554515,
+        "strongest_favorable_energy": -0.5826707357554515
+      },
+      "27": {
+        "angle_at_strongest_favorable": 174.27192184377952,
+        "distance_at_strongest_favorable": 3.892645296152975,
+        "max_favorable_magnitude": 1.2610805525284814,
+        "strongest_favorable_energy": -1.2610805525284814
+      },
+      "28": {
+        "angle_at_strongest_favorable": 166.93145015714634,
+        "distance_at_strongest_favorable": 3.358957999504126,
+        "max_favorable_magnitude": 2.205562684352345,
+        "strongest_favorable_energy": -2.205562684352345
+      },
+      "38": {
+        "angle_at_strongest_favorable": 171.6135269417669,
+        "distance_at_strongest_favorable": 3.309310883471233,
+        "max_favorable_magnitude": 2.5961201427273606,
+        "strongest_favorable_energy": -2.5961201427273606
+      },
+      "39": {
+        "angle_at_strongest_favorable": 172.70571834214087,
+        "distance_at_strongest_favorable": 3.2368073182857264,
+        "max_favorable_magnitude": 3.1394336186347473,
+        "strongest_favorable_energy": -3.1394336186347473
+      },
+      "41": {
+        "angle_at_strongest_favorable": 174.36993853797202,
+        "distance_at_strongest_favorable": 3.2590472141384446,
+        "max_favorable_magnitude": 2.985359880106821,
+        "strongest_favorable_energy": -2.985359880106821
+      }
+    },
+    "15": {
+      "13": {
+        "angle_at_strongest_favorable": 169.3871260505059,
+        "distance_at_strongest_favorable": 3.319891614048969,
+        "max_favorable_magnitude": 3.2296585087796688,
+        "strongest_favorable_energy": -3.2296585087796688
+      },
+      "14": {
+        "angle_at_strongest_favorable": 164.91647911608413,
+        "distance_at_strongest_favorable": 3.302679700857298,
+        "max_favorable_magnitude": 3.823450126523827,
+        "strongest_favorable_energy": -3.823450126523827
+      },
+      "15": {
+        "angle_at_strongest_favorable": 178.46997306323402,
+        "distance_at_strongest_favorable": 3.285321672593664,
+        "max_favorable_magnitude": 3.6435431081164147,
+        "strongest_favorable_energy": -3.6435431081164147
+      },
+      "16": {
+        "angle_at_strongest_favorable": 179.99999999999693,
+        "distance_at_strongest_favorable": 3.3269574990575403,
+        "max_favorable_magnitude": 2.9891125564648515,
+        "strongest_favorable_energy": -2.9891125564648515
+      },
+      "17": {
+        "angle_at_strongest_favorable": 179.9999999999988,
+        "distance_at_strongest_favorable": 3.428672610590434,
+        "max_favorable_magnitude": 2.2281793064824624,
+        "strongest_favorable_energy": -2.2281793064824624
+      },
+      "18": {
+        "angle_at_strongest_favorable": 172.9531059247807,
+        "distance_at_strongest_favorable": 3.2194697019830594,
+        "max_favorable_magnitude": 4.284376562973886,
+        "strongest_favorable_energy": -4.284376562973886
+      },
+      "19": {
+        "angle_at_strongest_favorable": 168.01492971753555,
+        "distance_at_strongest_favorable": 3.2677143049173587,
+        "max_favorable_magnitude": 2.513286503825338,
+        "strongest_favorable_energy": -2.513286503825338
+      },
+      "20": {
+        "angle_at_strongest_favorable": 120.81513141393656,
+        "distance_at_strongest_favorable": 3.282379267002635,
+        "max_favorable_magnitude": 1.9813113874441033,
+        "strongest_favorable_energy": -1.9813113874441033
+      },
+      "21": {
+        "angle_at_strongest_favorable": 166.18880398160115,
+        "distance_at_strongest_favorable": 3.3449947092346672,
+        "max_favorable_magnitude": 2.059487673631476,
+        "strongest_favorable_energy": -2.059487673631476
+      },
+      "22": {
+        "angle_at_strongest_favorable": 170.19330651024086,
+        "distance_at_strongest_favorable": 3.2160965305094686,
+        "max_favorable_magnitude": 2.971306434841301,
+        "strongest_favorable_energy": -2.971306434841301
+      },
+      "23": {
+        "angle_at_strongest_favorable": 179.99999999999767,
+        "distance_at_strongest_favorable": 3.883038088041511,
+        "max_favorable_magnitude": 1.9861130695501856,
+        "strongest_favorable_energy": -1.9861130695501856
+      },
+      "24": {
+        "angle_at_strongest_favorable": 123.97173575648227,
+        "distance_at_strongest_favorable": 3.704077455526952,
+        "max_favorable_magnitude": 1.6531441019266957,
+        "strongest_favorable_energy": -1.6531441019266957
+      },
+      "25": {
+        "angle_at_strongest_favorable": 118.08883868887159,
+        "distance_at_strongest_favorable": 3.69608105228476,
+        "max_favorable_magnitude": 1.6793993312293312,
+        "strongest_favorable_energy": -1.6793993312293312
+      },
+      "26": {
+        "angle_at_strongest_favorable": 119.42174341452811,
+        "distance_at_strongest_favorable": 3.6377851229766547,
+        "max_favorable_magnitude": 1.7052385340114453,
+        "strongest_favorable_energy": -1.7052385340114453
+      },
+      "27": {
+        "angle_at_strongest_favorable": 121.7051809881472,
+        "distance_at_strongest_favorable": 3.653434674345916,
+        "max_favorable_magnitude": 2.1764767701804226,
+        "strongest_favorable_energy": -2.1764767701804226
+      },
+      "28": {
+        "angle_at_strongest_favorable": 169.42093552365185,
+        "distance_at_strongest_favorable": 3.3297261347832148,
+        "max_favorable_magnitude": 2.164241223236103,
+        "strongest_favorable_energy": -2.164241223236103
+      },
+      "38": {
+        "angle_at_strongest_favorable": 164.90374832726877,
+        "distance_at_strongest_favorable": 3.251363961157505,
+        "max_favorable_magnitude": 2.8961507533734157,
+        "strongest_favorable_energy": -2.8961507533734157
+      },
+      "39": {
+        "angle_at_strongest_favorable": 164.26709177179396,
+        "distance_at_strongest_favorable": 3.2051582524572773,
+        "max_favorable_magnitude": 3.7391892060995833,
+        "strongest_favorable_energy": -3.7391892060995833
+      },
+      "41": {
+        "angle_at_strongest_favorable": 166.3881095517997,
+        "distance_at_strongest_favorable": 3.2229220465333546,
+        "max_favorable_magnitude": 3.095686391176275,
+        "strongest_favorable_energy": -3.095686391176275
+      }
+    },
+    "19": {
+      "13": {
+        "angle_at_strongest_favorable": 178.16307739808263,
+        "distance_at_strongest_favorable": 2.984316254711988,
+        "max_favorable_magnitude": 6.279284313916673,
+        "strongest_favorable_energy": -6.279284313916673
+      },
+      "14": {
+        "angle_at_strongest_favorable": 177.40186679344396,
+        "distance_at_strongest_favorable": 2.9634338075709072,
+        "max_favorable_magnitude": 6.5677474641812665,
+        "strongest_favorable_energy": -6.5677474641812665
+      },
+      "15": {
+        "angle_at_strongest_favorable": 174.14580035704165,
+        "distance_at_strongest_favorable": 2.9456302753638326,
+        "max_favorable_magnitude": 6.953475651674561,
+        "strongest_favorable_energy": -6.953475651674561
+      },
+      "16": {
+        "angle_at_strongest_favorable": 179.9999999999942,
+        "distance_at_strongest_favorable": 3.009673391706471,
+        "max_favorable_magnitude": 5.818721358824167,
+        "strongest_favorable_energy": -5.818721358824167
+      },
+      "17": {
+        "angle_at_strongest_favorable": 179.99999999999028,
+        "distance_at_strongest_favorable": 3.130235509806603,
+        "max_favorable_magnitude": 4.011779386989993,
+        "strongest_favorable_energy": -4.011779386989993
+      },
+      "18": {
+        "angle_at_strongest_favorable": 176.1663265110738,
+        "distance_at_strongest_favorable": 2.9113743201253337,
+        "max_favorable_magnitude": 7.484700706248706,
+        "strongest_favorable_energy": -7.484700706248706
+      },
+      "19": {
+        "angle_at_strongest_favorable": 179.99999999999176,
+        "distance_at_strongest_favorable": 2.9779518468683905,
+        "max_favorable_magnitude": 4.615674748665906,
+        "strongest_favorable_energy": -4.615674748665906
+      },
+      "20": {
+        "angle_at_strongest_favorable": 175.89096879257016,
+        "distance_at_strongest_favorable": 3.0767038709525263,
+        "max_favorable_magnitude": 3.039201016767681,
+        "strongest_favorable_energy": -3.039201016767681
+      },
+      "21": {
+        "angle_at_strongest_favorable": 179.99999999999483,
+        "distance_at_strongest_favorable": 3.0885240128444647,
+        "max_favorable_magnitude": 3.4838269002058873,
+        "strongest_favorable_energy": -3.4838269002058873
+      },
+      "22": {
+        "angle_at_strongest_favorable": 179.99999999999022,
+        "distance_at_strongest_favorable": 2.9423229994232747,
+        "max_favorable_magnitude": 5.0509291487627035,
+        "strongest_favorable_energy": -5.0509291487627035
+      },
+      "23": {
+        "angle_at_strongest_favorable": 174.24001394187707,
+        "distance_at_strongest_favorable": 3.6000416972143086,
+        "max_favorable_magnitude": 3.122876863760272,
+        "strongest_favorable_energy": -3.122876863760272
+      },
+      "24": {
+        "angle_at_strongest_favorable": 174.23837257991522,
+        "distance_at_strongest_favorable": 3.6662568695215105,
+        "max_favorable_magnitude": 1.6713771712896373,
+        "strongest_favorable_energy": -1.6713771712896373
+      },
+      "25": {
+        "angle_at_strongest_favorable": 179.99999999999267,
+        "distance_at_strongest_favorable": 3.7325510765463576,
+        "max_favorable_magnitude": 1.2364396815276422,
+        "strongest_favorable_energy": -1.2364396815276422
+      },
+      "26": {
+        "angle_at_strongest_favorable": 122.70936651184878,
+        "distance_at_strongest_favorable": 3.6065320052968053,
+        "max_favorable_magnitude": 0.7032667386372977,
+        "strongest_favorable_energy": -0.7032667386372977
+      },
+      "27": {
+        "angle_at_strongest_favorable": 178.05778667823245,
+        "distance_at_strongest_favorable": 3.593154344864124,
+        "max_favorable_magnitude": 2.3314426350505606,
+        "strongest_favorable_energy": -2.3314426350505606
+      },
+      "28": {
+        "angle_at_strongest_favorable": 179.9999999999975,
+        "distance_at_strongest_favorable": 3.0120415829203653,
+        "max_favorable_magnitude": 4.268760159384303,
+        "strongest_favorable_energy": -4.268760159384303
+      },
+      "38": {
+        "angle_at_strongest_favorable": 179.999999999993,
+        "distance_at_strongest_favorable": 2.9984168238305644,
+        "max_favorable_magnitude": 4.826467004660657,
+        "strongest_favorable_energy": -4.826467004660657
+      },
+      "39": {
+        "angle_at_strongest_favorable": 179.99999999999403,
+        "distance_at_strongest_favorable": 2.9508287263649366,
+        "max_favorable_magnitude": 5.684846749868383,
+        "strongest_favorable_energy": -5.684846749868383
+      },
+      "41": {
+        "angle_at_strongest_favorable": 179.99999999999778,
+        "distance_at_strongest_favorable": 2.952614586386624,
+        "max_favorable_magnitude": 5.300251188682738,
+        "strongest_favorable_energy": -5.300251188682738
+      }
+    },
+    "23": {
+      "13": {
+        "angle_at_strongest_favorable": 169.50735212761788,
+        "distance_at_strongest_favorable": 4.248037088275665,
+        "max_favorable_magnitude": 0.8676860180580492,
+        "strongest_favorable_energy": -0.8676860180580492
+      },
+      "14": {
+        "angle_at_strongest_favorable": 172.94204495386856,
+        "distance_at_strongest_favorable": 4.133979819209053,
+        "max_favorable_magnitude": 1.1135603797014815,
+        "strongest_favorable_energy": -1.1135603797014815
+      },
+      "15": {
+        "angle_at_strongest_favorable": 174.9187439247953,
+        "distance_at_strongest_favorable": 4.18208959484181,
+        "max_favorable_magnitude": 0.9543563919760354,
+        "strongest_favorable_energy": -0.9543563919760354
+      },
+      "16": {
+        "angle_at_strongest_favorable": 179.9999999999983,
+        "distance_at_strongest_favorable": 4.234172030195183,
+        "max_favorable_magnitude": 0.808575728437261,
+        "strongest_favorable_energy": -0.808575728437261
+      },
+      "17": {
+        "angle_at_strongest_favorable": 166.00365366293522,
+        "distance_at_strongest_favorable": 4.254960877153663,
+        "max_favorable_magnitude": 0.6547889840044956,
+        "strongest_favorable_energy": -0.6547889840044956
+      },
+      "18": {
+        "angle_at_strongest_favorable": 172.61634340733315,
+        "distance_at_strongest_favorable": 4.049131129912555,
+        "max_favorable_magnitude": 1.507077628869916,
+        "strongest_favorable_energy": -1.507077628869916
+      },
+      "19": {
+        "angle_at_strongest_favorable": 170.57398129552882,
+        "distance_at_strongest_favorable": 4.1439044459980705,
+        "max_favorable_magnitude": 0.9440685738279457,
+        "strongest_favorable_energy": -0.9440685738279457
+      },
+      "20": {
+        "angle_at_strongest_favorable": 115.0407099753197,
+        "distance_at_strongest_favorable": 3.7752591067481323,
+        "max_favorable_magnitude": 0.7328429518328239,
+        "strongest_favorable_energy": -0.7328429518328239
+      },
+      "21": {
+        "angle_at_strongest_favorable": 170.29903986023498,
+        "distance_at_strongest_favorable": 4.1342816847062815,
+        "max_favorable_magnitude": 0.6375042617335991,
+        "strongest_favorable_energy": -0.6375042617335991
+      },
+      "22": {
+        "angle_at_strongest_favorable": 169.92428267624535,
+        "distance_at_strongest_favorable": 4.005135551520023,
+        "max_favorable_magnitude": 1.0275636964661548,
+        "strongest_favorable_energy": -1.0275636964661548
+      },
+      "23": {
+        "angle_at_strongest_favorable": 110.00000100000037,
+        "distance_at_strongest_favorable": 4.182956694778132,
+        "max_favorable_magnitude": 0.9445044286623636,
+        "strongest_favorable_energy": -0.9445044286623636
+      },
+      "24": {
+        "angle_at_strongest_favorable": 119.41276836035921,
+        "distance_at_strongest_favorable": 4.09497079074771,
+        "max_favorable_magnitude": 0.8195946394599183,
+        "strongest_favorable_energy": -0.8195946394599183
+      },
+      "25": {
+        "angle_at_strongest_favorable": 114.21547669512788,
+        "distance_at_strongest_favorable": 4.106516879635131,
+        "max_favorable_magnitude": 0.7809675215642065,
+        "strongest_favorable_energy": -0.7809675215642065
+      },
+      "26": {
+        "angle_at_strongest_favorable": 120.01371066818928,
+        "distance_at_strongest_favorable": 4.052377713874624,
+        "max_favorable_magnitude": 0.820224030509161,
+        "strongest_favorable_energy": -0.820224030509161
+      },
+      "27": {
+        "angle_at_strongest_favorable": 121.83026286041803,
+        "distance_at_strongest_favorable": 4.186504344842867,
+        "max_favorable_magnitude": 0.8390634800451569,
+        "strongest_favorable_energy": -0.8390634800451569
+      },
+      "28": {
+        "angle_at_strongest_favorable": 169.82265312205539,
+        "distance_at_strongest_favorable": 4.159759702244742,
+        "max_favorable_magnitude": 0.5581005421058087,
+        "strongest_favorable_energy": -0.5581005421058087
+      },
+      "38": {
+        "angle_at_strongest_favorable": 169.38380656435822,
+        "distance_at_strongest_favorable": 4.011895689078371,
+        "max_favorable_magnitude": 0.9718908406748614,
+        "strongest_favorable_energy": -0.9718908406748614
+      },
+      "39": {
+        "angle_at_strongest_favorable": 170.7678785803214,
+        "distance_at_strongest_favorable": 3.9611252925026177,
+        "max_favorable_magnitude": 1.1656660167047974,
+        "strongest_favorable_energy": -1.1656660167047974
+      },
+      "41": {
+        "angle_at_strongest_favorable": 179.99999999999847,
+        "distance_at_strongest_favorable": 3.987037512692507,
+        "max_favorable_magnitude": 0.9926598946706413,
+        "strongest_favorable_energy": -0.9926598946706413
+      }
+    },
+    "24": {
+      "13": {
+        "angle_at_strongest_favorable": 173.87646624928362,
+        "distance_at_strongest_favorable": 3.741304403060708,
+        "max_favorable_magnitude": 1.7991148466532874,
+        "strongest_favorable_energy": -1.7991148466532874
+      },
+      "14": {
+        "angle_at_strongest_favorable": 171.55199485804314,
+        "distance_at_strongest_favorable": 3.62508754770467,
+        "max_favorable_magnitude": 3.190227014796415,
+        "strongest_favorable_energy": -3.190227014796415
+      },
+      "15": {
+        "angle_at_strongest_favorable": 172.10768745181372,
+        "distance_at_strongest_favorable": 3.6603015930712726,
+        "max_favorable_magnitude": 2.9994833054130456,
+        "strongest_favorable_energy": -2.9994833054130456
+      },
+      "16": {
+        "angle_at_strongest_favorable": 173.19192057181618,
+        "distance_at_strongest_favorable": 3.577344106276157,
+        "max_favorable_magnitude": 3.6261000675376955,
+        "strongest_favorable_energy": -3.6261000675376955
+      },
+      "17": {
+        "angle_at_strongest_favorable": 179.99999999999415,
+        "distance_at_strongest_favorable": 3.5776913253277387,
+        "max_favorable_magnitude": 3.4952219834550693,
+        "strongest_favorable_energy": -3.4952219834550693
+      },
+      "18": {
+        "angle_at_strongest_favorable": 175.85668606954323,
+        "distance_at_strongest_favorable": 3.8517996062749704,
+        "max_favorable_magnitude": 2.0418626135579796,
+        "strongest_favorable_energy": -2.0418626135579796
+      },
+      "19": {
+        "angle_at_strongest_favorable": 173.3559843283815,
+        "distance_at_strongest_favorable": 3.475676993581353,
+        "max_favorable_magnitude": 4.426737733334274,
+        "strongest_favorable_energy": -4.426737733334274
+      },
+      "20": {
+        "angle_at_strongest_favorable": 179.99999999999937,
+        "distance_at_strongest_favorable": 3.5831373435661495,
+        "max_favorable_magnitude": 2.7252326677793555,
+        "strongest_favorable_energy": -2.7252326677793555
+      },
+      "21": {
+        "angle_at_strongest_favorable": 172.6988281055772,
+        "distance_at_strongest_favorable": 3.7117050231567124,
+        "max_favorable_magnitude": 1.7972395700719037,
+        "strongest_favorable_energy": -1.7972395700719037
+      },
+      "22": {
+        "angle_at_strongest_favorable": 179.99999999999903,
+        "distance_at_strongest_favorable": 3.527509559083078,
+        "max_favorable_magnitude": 3.0162628177514623,
+        "strongest_favorable_energy": -3.0162628177514623
+      },
+      "23": {
+        "angle_at_strongest_favorable": 171.65660857336752,
+        "distance_at_strongest_favorable": 4.333954233376485,
+        "max_favorable_magnitude": 1.7308425407596193,
+        "strongest_favorable_energy": -1.7308425407596193
+      },
+      "24": {
+        "angle_at_strongest_favorable": 173.57460308177997,
+        "distance_at_strongest_favorable": 4.213952488637695,
+        "max_favorable_magnitude": 1.3562058043829097,
+        "strongest_favorable_energy": -1.3562058043829097
+      },
+      "25": {
+        "angle_at_strongest_favorable": 170.5117236980994,
+        "distance_at_strongest_favorable": 4.279897917647112,
+        "max_favorable_magnitude": 0.9995748631930201,
+        "strongest_favorable_energy": -0.9995748631930201
+      },
+      "26": {
+        "angle_at_strongest_favorable": 122.5026169780566,
+        "distance_at_strongest_favorable": 3.9696746411641763,
+        "max_favorable_magnitude": 0.9042089235069604,
+        "strongest_favorable_energy": -0.9042089235069604
+      },
+      "27": {
+        "angle_at_strongest_favorable": 179.99999999999926,
+        "distance_at_strongest_favorable": 4.1508861696620825,
+        "max_favorable_magnitude": 1.746924866594691,
+        "strongest_favorable_energy": -1.746924866594691
+      },
+      "28": {
+        "angle_at_strongest_favorable": 173.86071072168795,
+        "distance_at_strongest_favorable": 3.6782219252852633,
+        "max_favorable_magnitude": 2.039317620393172,
+        "strongest_favorable_energy": -2.039317620393172
+      },
+      "38": {
+        "angle_at_strongest_favorable": 179.99999999999886,
+        "distance_at_strongest_favorable": 3.6152974477768547,
+        "max_favorable_magnitude": 2.7480178941071802,
+        "strongest_favorable_energy": -2.7480178941071802
+      },
+      "39": {
+        "angle_at_strongest_favorable": 179.99999999998727,
+        "distance_at_strongest_favorable": 3.556117417479567,
+        "max_favorable_magnitude": 3.1570533959524045,
+        "strongest_favorable_energy": -3.1570533959524045
+      },
+      "41": {
+        "angle_at_strongest_favorable": 179.9999999999938,
+        "distance_at_strongest_favorable": 3.58301891031482,
+        "max_favorable_magnitude": 2.8853435453625274,
+        "strongest_favorable_energy": -2.8853435453625274
+      }
+    },
+    "28": {
+      "13": {
+        "angle_at_strongest_favorable": 178.8558973178247,
+        "distance_at_strongest_favorable": 3.0232705475171437,
+        "max_favorable_magnitude": 5.687005133215427,
+        "strongest_favorable_energy": -5.687005133215427
+      },
+      "14": {
+        "angle_at_strongest_favorable": 177.3776979127622,
+        "distance_at_strongest_favorable": 2.9917011421360717,
+        "max_favorable_magnitude": 6.075390486983228,
+        "strongest_favorable_energy": -6.075390486983228
+      },
+      "15": {
+        "angle_at_strongest_favorable": 173.46475978359342,
+        "distance_at_strongest_favorable": 2.9785016160432454,
+        "max_favorable_magnitude": 6.334042294530899,
+        "strongest_favorable_energy": -6.334042294530899
+      },
+      "16": {
+        "angle_at_strongest_favorable": 179.99999999995106,
+        "distance_at_strongest_favorable": 3.031263486855279,
+        "max_favorable_magnitude": 5.540208487905481,
+        "strongest_favorable_energy": -5.540208487905481
+      },
+      "17": {
+        "angle_at_strongest_favorable": 178.6942744455855,
+        "distance_at_strongest_favorable": 3.1498488731278194,
+        "max_favorable_magnitude": 3.7790350015181637,
+        "strongest_favorable_energy": -3.7790350015181637
+      },
+      "18": {
+        "angle_at_strongest_favorable": 175.1263103956681,
+        "distance_at_strongest_favorable": 2.943342135987269,
+        "max_favorable_magnitude": 6.700151275777026,
+        "strongest_favorable_energy": -6.700151275777026
+      },
+      "19": {
+        "angle_at_strongest_favorable": 179.9999999999938,
+        "distance_at_strongest_favorable": 3.0160621031468917,
+        "max_favorable_magnitude": 4.0623451278450275,
+        "strongest_favorable_energy": -4.0623451278450275
+      },
+      "20": {
+        "angle_at_strongest_favorable": 173.49818855121833,
+        "distance_at_strongest_favorable": 3.091748841686094,
+        "max_favorable_magnitude": 2.8321631243968524,
+        "strongest_favorable_energy": -2.8321631243968524
+      },
+      "21": {
+        "angle_at_strongest_favorable": 179.99999999998818,
+        "distance_at_strongest_favorable": 3.107763215883037,
+        "max_favorable_magnitude": 3.303094028087517,
+        "strongest_favorable_energy": -3.303094028087517
+      },
+      "22": {
+        "angle_at_strongest_favorable": 178.85584125620318,
+        "distance_at_strongest_favorable": 2.9418385894946733,
+        "max_favorable_magnitude": 4.987730902549428,
+        "strongest_favorable_energy": -4.987730902549428
+      },
+      "23": {
+        "angle_at_strongest_favorable": 177.78174008623165,
+        "distance_at_strongest_favorable": 3.6693795297852585,
+        "max_favorable_magnitude": 2.6895343450449722,
+        "strongest_favorable_energy": -2.6895343450449722
+      },
+      "24": {
+        "angle_at_strongest_favorable": 174.91202339670906,
+        "distance_at_strongest_favorable": 3.6938192232668596,
+        "max_favorable_magnitude": 1.6232235330055111,
+        "strongest_favorable_energy": -1.6232235330055111
+      },
+      "25": {
+        "angle_at_strongest_favorable": 173.04980544822052,
+        "distance_at_strongest_favorable": 3.7731182465224293,
+        "max_favorable_magnitude": 0.944708584745122,
+        "strongest_favorable_energy": -0.944708584745122
+      },
+      "26": {
+        "angle_at_strongest_favorable": 179.99999999999676,
+        "distance_at_strongest_favorable": 3.9086329155653434,
+        "max_favorable_magnitude": 0.5558026583501512,
+        "strongest_favorable_energy": -0.5558026583501512
+      },
+      "27": {
+        "angle_at_strongest_favorable": 172.5341567155653,
+        "distance_at_strongest_favorable": 3.628877632884188,
+        "max_favorable_magnitude": 2.12499055875041,
+        "strongest_favorable_energy": -2.12499055875041
+      },
+      "28": {
+        "angle_at_strongest_favorable": 179.9999999999958,
+        "distance_at_strongest_favorable": 3.0181345002291113,
+        "max_favorable_magnitude": 3.9666935647556727,
+        "strongest_favorable_energy": -3.9666935647556727
+      },
+      "38": {
+        "angle_at_strongest_favorable": 179.99999999999227,
+        "distance_at_strongest_favorable": 3.0321457459152628,
+        "max_favorable_magnitude": 4.573425094795068,
+        "strongest_favorable_energy": -4.573425094795068
+      },
+      "39": {
+        "angle_at_strongest_favorable": 179.99999999999642,
+        "distance_at_strongest_favorable": 2.9724292229742852,
+        "max_favorable_magnitude": 5.5780485043823305,
+        "strongest_favorable_energy": -5.5780485043823305
+      },
+      "41": {
+        "angle_at_strongest_favorable": 179.99999999999716,
+        "distance_at_strongest_favorable": 2.987106310866004,
+        "max_favorable_magnitude": 5.126891361246258,
+        "strongest_favorable_energy": -5.126891361246258
+      }
+    },
+    "37": {
+      "13": {
+        "angle_at_strongest_favorable": 176.51958760505545,
+        "distance_at_strongest_favorable": 3.1571551375794673,
+        "max_favorable_magnitude": 5.96464581584482,
+        "strongest_favorable_energy": -5.96464581584482
+      },
+      "14": {
+        "angle_at_strongest_favorable": 178.7185023768738,
+        "distance_at_strongest_favorable": 3.1100309216902717,
+        "max_favorable_magnitude": 6.657612974238178,
+        "strongest_favorable_energy": -6.657612974238178
+      },
+      "15": {
+        "angle_at_strongest_favorable": 177.23254228249016,
+        "distance_at_strongest_favorable": 3.142426934423983,
+        "max_favorable_magnitude": 5.9719379225727405,
+        "strongest_favorable_energy": -5.9719379225727405
+      },
+      "16": {
+        "angle_at_strongest_favorable": 179.88606417639198,
+        "distance_at_strongest_favorable": 3.164931872406852,
+        "max_favorable_magnitude": 5.819794951555689,
+        "strongest_favorable_energy": -5.819794951555689
+      },
+      "17": {
+        "angle_at_strongest_favorable": 179.99999999999852,
+        "distance_at_strongest_favorable": 3.241305198041408,
+        "max_favorable_magnitude": 4.651570818063098,
+        "strongest_favorable_energy": -4.651570818063098
+      },
+      "18": {
+        "angle_at_strongest_favorable": 179.99999999999818,
+        "distance_at_strongest_favorable": 3.074377006567131,
+        "max_favorable_magnitude": 6.759276566024086,
+        "strongest_favorable_energy": -6.759276566024086
+      },
+      "19": {
+        "angle_at_strongest_favorable": 179.9999999999992,
+        "distance_at_strongest_favorable": 3.071807050212821,
+        "max_favorable_magnitude": 5.220939541993291,
+        "strongest_favorable_energy": -5.220939541993291
+      },
+      "20": {
+        "angle_at_strongest_favorable": 179.99999999999966,
+        "distance_at_strongest_favorable": 3.1764200623213847,
+        "max_favorable_magnitude": 3.2904082417144984,
+        "strongest_favorable_energy": -3.2904082417144984
+      },
+      "21": {
+        "angle_at_strongest_favorable": 178.2262199272829,
+        "distance_at_strongest_favorable": 3.1727537108691086,
+        "max_favorable_magnitude": 4.10309980268708,
+        "strongest_favorable_energy": -4.10309980268708
+      },
+      "22": {
+        "angle_at_strongest_favorable": 179.9999999999992,
+        "distance_at_strongest_favorable": 3.051263428073505,
+        "max_favorable_magnitude": 5.32795530687171,
+        "strongest_favorable_energy": -5.32795530687171
+      },
+      "23": {
+        "angle_at_strongest_favorable": 179.99999999999642,
+        "distance_at_strongest_favorable": 3.7755397360232106,
+        "max_favorable_magnitude": 2.7677569881379647,
+        "strongest_favorable_energy": -2.7677569881379647
+      },
+      "24": {
+        "angle_at_strongest_favorable": 179.99999999999693,
+        "distance_at_strongest_favorable": 3.7834269238389107,
+        "max_favorable_magnitude": 2.040451702117675,
+        "strongest_favorable_energy": -2.040451702117675
+      },
+      "25": {
+        "angle_at_strongest_favorable": 179.99999999999812,
+        "distance_at_strongest_favorable": 3.8270705140857713,
+        "max_favorable_magnitude": 1.3711413716433123,
+        "strongest_favorable_energy": -1.3711413716433123
+      },
+      "26": {
+        "angle_at_strongest_favorable": 179.99999999999966,
+        "distance_at_strongest_favorable": 3.9644091916436004,
+        "max_favorable_magnitude": 0.7428785313358306,
+        "strongest_favorable_energy": -0.7428785313358306
+      },
+      "27": {
+        "angle_at_strongest_favorable": 179.9999999999988,
+        "distance_at_strongest_favorable": 3.673319918213995,
+        "max_favorable_magnitude": 2.9555634643225357,
+        "strongest_favorable_energy": -2.9555634643225357
+      },
+      "28": {
+        "angle_at_strongest_favorable": 179.9999999999995,
+        "distance_at_strongest_favorable": 3.1112206780263616,
+        "max_favorable_magnitude": 4.839393716845484,
+        "strongest_favorable_energy": -4.839393716845484
+      },
+      "38": {
+        "angle_at_strongest_favorable": 179.9999999999996,
+        "distance_at_strongest_favorable": 3.084568796861541,
+        "max_favorable_magnitude": 5.886000956901148,
+        "strongest_favorable_energy": -5.886000956901148
+      },
+      "39": {
+        "angle_at_strongest_favorable": 179.99999999999875,
+        "distance_at_strongest_favorable": 3.038094831386914,
+        "max_favorable_magnitude": 6.83115963800522,
+        "strongest_favorable_energy": -6.83115963800522
+      },
+      "41": {
+        "angle_at_strongest_favorable": 179.99999999999756,
+        "distance_at_strongest_favorable": 3.054573314832492,
+        "max_favorable_magnitude": 6.31453457524808,
+        "strongest_favorable_energy": -6.31453457524808
+      }
+    },
+    "40": {
+      "13": {
+        "angle_at_strongest_favorable": 176.55232467857718,
+        "distance_at_strongest_favorable": 3.1963296166059605,
+        "max_favorable_magnitude": 5.869310076929615,
+        "strongest_favorable_energy": -5.869310076929615
+      },
+      "14": {
+        "angle_at_strongest_favorable": 174.05722272252746,
+        "distance_at_strongest_favorable": 3.289646660043534,
+        "max_favorable_magnitude": 5.933248985562699,
+        "strongest_favorable_energy": -5.933248985562699
+      },
+      "15": {
+        "angle_at_strongest_favorable": 171.49177630498838,
+        "distance_at_strongest_favorable": 3.2859251044327946,
+        "max_favorable_magnitude": 5.805903976463323,
+        "strongest_favorable_energy": -5.805903976463323
+      },
+      "16": {
+        "angle_at_strongest_favorable": 175.56271785991197,
+        "distance_at_strongest_favorable": 3.211597881654334,
+        "max_favorable_magnitude": 5.529232755634991,
+        "strongest_favorable_energy": -5.529232755634991
+      },
+      "17": {
+        "angle_at_strongest_favorable": 174.3189071436346,
+        "distance_at_strongest_favorable": 3.2781176637645455,
+        "max_favorable_magnitude": 4.546454232785312,
+        "strongest_favorable_energy": -4.546454232785312
+      },
+      "18": {
+        "angle_at_strongest_favorable": 175.8420115648646,
+        "distance_at_strongest_favorable": 3.361299132677134,
+        "max_favorable_magnitude": 5.725008258307016,
+        "strongest_favorable_energy": -5.725008258307016
+      },
+      "19": {
+        "angle_at_strongest_favorable": 177.3295095105811,
+        "distance_at_strongest_favorable": 3.1518023665481563,
+        "max_favorable_magnitude": 4.558694090839289,
+        "strongest_favorable_energy": -4.558694090839289
+      },
+      "20": {
+        "angle_at_strongest_favorable": 173.52213181728513,
+        "distance_at_strongest_favorable": 3.324769312310556,
+        "max_favorable_magnitude": 2.961769698654651,
+        "strongest_favorable_energy": -2.961769698654651
+      },
+      "21": {
+        "angle_at_strongest_favorable": 173.62763584251195,
+        "distance_at_strongest_favorable": 3.220942734787509,
+        "max_favorable_magnitude": 3.886100990469351,
+        "strongest_favorable_energy": -3.886100990469351
+      },
+      "22": {
+        "angle_at_strongest_favorable": 179.99999999998255,
+        "distance_at_strongest_favorable": 3.1955064695200637,
+        "max_favorable_magnitude": 4.830683624802148,
+        "strongest_favorable_energy": -4.830683624802148
+      },
+      "23": {
+        "angle_at_strongest_favorable": 172.3472138568883,
+        "distance_at_strongest_favorable": 3.806969880441125,
+        "max_favorable_magnitude": 3.4405227831876566,
+        "strongest_favorable_energy": -3.4405227831876566
+      },
+      "24": {
+        "angle_at_strongest_favorable": 167.97530939430283,
+        "distance_at_strongest_favorable": 3.723527016038876,
+        "max_favorable_magnitude": 2.611228581934343,
+        "strongest_favorable_energy": -2.611228581934343
+      },
+      "25": {
+        "angle_at_strongest_favorable": 167.95794541048986,
+        "distance_at_strongest_favorable": 3.7889214052863114,
+        "max_favorable_magnitude": 1.747008983944232,
+        "strongest_favorable_energy": -1.747008983944232
+      },
+      "26": {
+        "angle_at_strongest_favorable": 120.01789366852107,
+        "distance_at_strongest_favorable": 3.5667963602795103,
+        "max_favorable_magnitude": 1.84085408120351,
+        "strongest_favorable_energy": -1.84085408120351
+      },
+      "27": {
+        "angle_at_strongest_favorable": 170.13842504954323,
+        "distance_at_strongest_favorable": 3.695604819132722,
+        "max_favorable_magnitude": 3.071724344667434,
+        "strongest_favorable_energy": -3.071724344667434
+      },
+      "28": {
+        "angle_at_strongest_favorable": 176.4627565736164,
+        "distance_at_strongest_favorable": 3.1809979802778896,
+        "max_favorable_magnitude": 4.219644463008439,
+        "strongest_favorable_energy": -4.219644463008439
+      },
+      "38": {
+        "angle_at_strongest_favorable": 174.55530063472787,
+        "distance_at_strongest_favorable": 3.117336330263903,
+        "max_favorable_magnitude": 5.7696795872963715,
+        "strongest_favorable_energy": -5.7696795872963715
+      },
+      "39": {
+        "angle_at_strongest_favorable": 179.99999999999613,
+        "distance_at_strongest_favorable": 3.0612258628485822,
+        "max_favorable_magnitude": 6.685645136805192,
+        "strongest_favorable_energy": -6.685645136805192
+      },
+      "41": {
+        "angle_at_strongest_favorable": 179.99999999999568,
+        "distance_at_strongest_favorable": 3.1064811160487826,
+        "max_favorable_magnitude": 6.497078923660199,
+        "strongest_favorable_energy": -6.497078923660199
+      }
+    },
+    "42": {
+      "13": {
+        "angle_at_strongest_favorable": 177.98540191813186,
+        "distance_at_strongest_favorable": 2.797173717712802,
+        "max_favorable_magnitude": 11.042183638700209,
+        "strongest_favorable_energy": -11.042183638700209
+      },
+      "14": {
+        "angle_at_strongest_favorable": 177.82775233052075,
+        "distance_at_strongest_favorable": 2.7726721303293234,
+        "max_favorable_magnitude": 11.549790252226622,
+        "strongest_favorable_energy": -11.549790252226622
+      },
+      "15": {
+        "angle_at_strongest_favorable": 173.94557290278436,
+        "distance_at_strongest_favorable": 2.7612303813600603,
+        "max_favorable_magnitude": 11.865532913946048,
+        "strongest_favorable_energy": -11.865532913946048
+      },
+      "16": {
+        "angle_at_strongest_favorable": 176.7116518833949,
+        "distance_at_strongest_favorable": 2.8114930492908803,
+        "max_favorable_magnitude": 10.205283991303027,
+        "strongest_favorable_energy": -10.205283991303027
+      },
+      "17": {
+        "angle_at_strongest_favorable": 176.28196094935754,
+        "distance_at_strongest_favorable": 2.941197760995964,
+        "max_favorable_magnitude": 6.703943049807965,
+        "strongest_favorable_energy": -6.703943049807965
+      },
+      "18": {
+        "angle_at_strongest_favorable": 175.84384913866893,
+        "distance_at_strongest_favorable": 2.756113825463637,
+        "max_favorable_magnitude": 12.889579199816719,
+        "strongest_favorable_energy": -12.889579199816719
+      },
+      "19": {
+        "angle_at_strongest_favorable": 179.99999999999727,
+        "distance_at_strongest_favorable": 2.782739989800369,
+        "max_favorable_magnitude": 8.09418372207964,
+        "strongest_favorable_energy": -8.09418372207964
+      },
+      "20": {
+        "angle_at_strongest_favorable": 175.2677739286326,
+        "distance_at_strongest_favorable": 2.8644992742899813,
+        "max_favorable_magnitude": 5.543419743313677,
+        "strongest_favorable_energy": -5.543419743313677
+      },
+      "21": {
+        "angle_at_strongest_favorable": 179.99999999999574,
+        "distance_at_strongest_favorable": 2.9168696418568,
+        "max_favorable_magnitude": 5.6043327613977585,
+        "strongest_favorable_energy": -5.6043327613977585
+      },
+      "22": {
+        "angle_at_strongest_favorable": 177.32326924728483,
+        "distance_at_strongest_favorable": 2.7495591569039357,
+        "max_favorable_magnitude": 8.980619990004048,
+        "strongest_favorable_energy": -8.980619990004048
+      },
+      "23": {
+        "angle_at_strongest_favorable": 174.06746132796616,
+        "distance_at_strongest_favorable": 3.3915519507458383,
+        "max_favorable_magnitude": 5.594765402589507,
+        "strongest_favorable_energy": -5.594765402589507
+      },
+      "24": {
+        "angle_at_strongest_favorable": 179.99999999999125,
+        "distance_at_strongest_favorable": 3.4594468951840893,
+        "max_favorable_magnitude": 2.93540597611754,
+        "strongest_favorable_energy": -2.93540597611754
+      },
+      "25": {
+        "angle_at_strongest_favorable": 179.99999999992554,
+        "distance_at_strongest_favorable": 3.5266658946382314,
+        "max_favorable_magnitude": 2.0049978196987386,
+        "strongest_favorable_energy": -2.0049978196987386
+      },
+      "26": {
+        "angle_at_strongest_favorable": 179.99999999999585,
+        "distance_at_strongest_favorable": 3.739744627461917,
+        "max_favorable_magnitude": 0.990873641372441,
+        "strongest_favorable_energy": -0.990873641372441
+      },
+      "27": {
+        "angle_at_strongest_favorable": 174.73287220520905,
+        "distance_at_strongest_favorable": 3.4164026592394814,
+        "max_favorable_magnitude": 3.8163540868540675,
+        "strongest_favorable_energy": -3.8163540868540675
+      },
+      "28": {
+        "angle_at_strongest_favorable": 178.5336745452429,
+        "distance_at_strongest_favorable": 2.8295376338965346,
+        "max_favorable_magnitude": 7.110834898335481,
+        "strongest_favorable_energy": -7.110834898335481
+      },
+      "38": {
+        "angle_at_strongest_favorable": 179.99999999999926,
+        "distance_at_strongest_favorable": 2.821792060596815,
+        "max_favorable_magnitude": 8.101311613448706,
+        "strongest_favorable_energy": -8.101311613448706
+      },
+      "39": {
+        "angle_at_strongest_favorable": 179.9999999999992,
+        "distance_at_strongest_favorable": 2.7817751915239093,
+        "max_favorable_magnitude": 9.300697484895556,
+        "strongest_favorable_energy": -9.300697484895556
+      },
+      "41": {
+        "angle_at_strongest_favorable": 179.99999999999892,
+        "distance_at_strongest_favorable": 2.7506213656204412,
+        "max_favorable_magnitude": 9.008771815554107,
+        "strongest_favorable_energy": -9.008771815554107
+      }
+    },
+    "43": {
+      "13": {
+        "angle_at_strongest_favorable": 179.592727916341,
+        "distance_at_strongest_favorable": 3.373323605098453,
+        "max_favorable_magnitude": 2.880417856537365,
+        "strongest_favorable_energy": -2.880417856537365
+      },
+      "14": {
+        "angle_at_strongest_favorable": 179.99999999999835,
+        "distance_at_strongest_favorable": 3.3281540078883998,
+        "max_favorable_magnitude": 3.14055464264559,
+        "strongest_favorable_energy": -3.14055464264559
+      },
+      "15": {
+        "angle_at_strongest_favorable": 173.04069318463752,
+        "distance_at_strongest_favorable": 3.3411806510022215,
+        "max_favorable_magnitude": 2.9470778999786296,
+        "strongest_favorable_energy": -2.9470778999786296
+      },
+      "16": {
+        "angle_at_strongest_favorable": 174.25043993646915,
+        "distance_at_strongest_favorable": 3.3905556320236663,
+        "max_favorable_magnitude": 2.636574778851756,
+        "strongest_favorable_energy": -2.636574778851756
+      },
+      "17": {
+        "angle_at_strongest_favorable": 179.10861254363851,
+        "distance_at_strongest_favorable": 3.4812313180397023,
+        "max_favorable_magnitude": 1.9725991397488407,
+        "strongest_favorable_energy": -1.9725991397488407
+      },
+      "18": {
+        "angle_at_strongest_favorable": 177.06314557330097,
+        "distance_at_strongest_favorable": 3.2717925941290185,
+        "max_favorable_magnitude": 3.6390153714132687,
+        "strongest_favorable_energy": -3.6390153714132687
+      },
+      "19": {
+        "angle_at_strongest_favorable": 179.99999999999318,
+        "distance_at_strongest_favorable": 3.2903248245491596,
+        "max_favorable_magnitude": 2.352242444734337,
+        "strongest_favorable_energy": -2.352242444734337
+      },
+      "20": {
+        "angle_at_strongest_favorable": 171.43590800579437,
+        "distance_at_strongest_favorable": 3.418204598287086,
+        "max_favorable_magnitude": 1.5487376632241663,
+        "strongest_favorable_energy": -1.5487376632241663
+      },
+      "21": {
+        "angle_at_strongest_favorable": 179.99999999999864,
+        "distance_at_strongest_favorable": 3.4049260843031446,
+        "max_favorable_magnitude": 1.7451958819126645,
+        "strongest_favorable_energy": -1.7451958819126645
+      },
+      "22": {
+        "angle_at_strongest_favorable": 179.99999999998738,
+        "distance_at_strongest_favorable": 3.2295576585793606,
+        "max_favorable_magnitude": 2.732525724705596,
+        "strongest_favorable_energy": -2.732525724705596
+      },
+      "23": {
+        "angle_at_strongest_favorable": 169.20410775125134,
+        "distance_at_strongest_favorable": 3.9807030132116683,
+        "max_favorable_magnitude": 1.683060993710014,
+        "strongest_favorable_energy": -1.683060993710014
+      },
+      "24": {
+        "angle_at_strongest_favorable": 179.99999999999915,
+        "distance_at_strongest_favorable": 3.900501043579095,
+        "max_favorable_magnitude": 1.116697143301855,
+        "strongest_favorable_energy": -1.116697143301855
+      },
+      "25": {
+        "angle_at_strongest_favorable": 170.44923752987393,
+        "distance_at_strongest_favorable": 3.9886251210952643,
+        "max_favorable_magnitude": 0.7560722480868893,
+        "strongest_favorable_energy": -0.7560722480868893
+      },
+      "26": {
+        "angle_at_strongest_favorable": 122.48365475037346,
+        "distance_at_strongest_favorable": 3.7295201048744913,
+        "max_favorable_magnitude": 0.5826707357554515,
+        "strongest_favorable_energy": -0.5826707357554515
+      },
+      "27": {
+        "angle_at_strongest_favorable": 174.27192184377952,
+        "distance_at_strongest_favorable": 3.892645296152975,
+        "max_favorable_magnitude": 1.2610805525284814,
+        "strongest_favorable_energy": -1.2610805525284814
+      },
+      "28": {
+        "angle_at_strongest_favorable": 166.93145015714634,
+        "distance_at_strongest_favorable": 3.358957999504126,
+        "max_favorable_magnitude": 2.205562684352345,
+        "strongest_favorable_energy": -2.205562684352345
+      },
+      "38": {
+        "angle_at_strongest_favorable": 171.6135269417669,
+        "distance_at_strongest_favorable": 3.309310883471233,
+        "max_favorable_magnitude": 2.5961201427273606,
+        "strongest_favorable_energy": -2.5961201427273606
+      },
+      "39": {
+        "angle_at_strongest_favorable": 172.70571834214087,
+        "distance_at_strongest_favorable": 3.2368073182857264,
+        "max_favorable_magnitude": 3.1394336186347473,
+        "strongest_favorable_energy": -3.1394336186347473
+      },
+      "41": {
+        "angle_at_strongest_favorable": 174.36993853797202,
+        "distance_at_strongest_favorable": 3.2590472141384446,
+        "max_favorable_magnitude": 2.985359880106821,
+        "strongest_favorable_energy": -2.985359880106821
+      }
+    }
+  }
+}

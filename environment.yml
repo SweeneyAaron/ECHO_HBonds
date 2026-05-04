@@ -1,0 +1,8 @@
+name: hbond-chemem
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - openmm>=8.3
+  - pdbfixer>=1.12
+  - pip

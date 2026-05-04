@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hbond-chemem"
+version = "0.1.0"
+description = "Backbone amide HBond scoring using ChemEM HBond polynomial tables"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "openmm>=8.3",
+  "pdbfixer>=1.12",
+]
+
+[project.scripts]
+hbond-chemem = "HBOND_CHEMEM.cli:main"
+
+[tool.setuptools]
+packages = ["HBOND_CHEMEM"]
+
+[tool.setuptools.package-data]
+HBOND_CHEMEM = ["data/*.json", "data/*.tsv"]

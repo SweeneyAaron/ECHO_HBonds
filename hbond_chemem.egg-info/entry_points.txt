@@ -1,0 +1,2 @@
+[console_scripts]
+hbond-chemem = HBOND_CHEMEM.cli:main
