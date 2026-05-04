@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hbond-chemem"
 version = "0.1.0"
-description = "Backbone amide HBond scoring using ChemEM HBond polynomial tables"
+description = "Protein HBond scoring using ChemEM HBond polynomial tables"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [

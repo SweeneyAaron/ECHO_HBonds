@@ -1,4 +1,4 @@
-"""Command line interface for backbone amide HBond scoring."""
+"""Command line interface for protein HBond scoring."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import argparse
 import sys
 
 from .backbone_amide import score_pdb, write_csv, write_json
+from .environment_context import CONTEXT_MODE_FAST, CONTEXT_MODE_NONE
 from .hydrogen import add_hydrogens_with_pdbfixer
 
 
@@ -14,19 +15,28 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "score":
-            result = score_pdb(args.input_pdb, hydrogen_mode=args.hydrogen_mode, ph=args.ph)
+            result = score_pdb(
+                args.input_pdb,
+                hydrogen_mode=args.hydrogen_mode,
+                ph=args.ph,
+                atom_types=args.atom_types,
+                context_mode=args.context_mode,
+                workers=args.workers,
+            )
             write_json(result, args.json)
             write_csv(result, args.csv)
             print(
                 f"Scored {result.counts['hbonds']} HBonds "
-                f"from {result.counts['backbone_donors']} donors and "
-                f"{result.counts['backbone_acceptors']} acceptors."
+                f"from {result.counts['donors']} donors and "
+                f"{result.counts['acceptors']} acceptors "
+                f"(selector: {result.atom_types})."
             )
             print(
                 "Timing seconds: "
                 f"parse={result.timing_seconds['parse']:.6f}, "
                 f"hydrogen={result.timing_seconds['hydrogen']:.6f}, "
                 f"score={result.timing_seconds['score']:.6f}, "
+                f"context={result.timing_seconds['context']:.6f}, "
                 f"total={result.timing_seconds['total']:.6f}"
             )
             return 0
@@ -49,7 +59,7 @@ def main(argv: list[str] | None = None) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m HBOND_CHEMEM",
-        description="Score backbone amide HBonds with ChemEM HBond scoring functions.",
+        description="Score protein HBonds with ChemEM HBond scoring functions.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -58,15 +68,38 @@ def build_parser() -> argparse.ArgumentParser:
     score_parser.add_argument("--json", required=True, help="output JSON path")
     score_parser.add_argument("--csv", required=True, help="output CSV path")
     score_parser.add_argument(
+        "--atom-types",
+        default="N",
+        help=(
+            "comma-separated atom selector; examples: N, N,O, NZ, SER:OG, 40, ALL, * "
+            "(default: N)"
+        ),
+    )
+    score_parser.add_argument(
         "--hydrogen-mode",
         choices=("auto", "explicit", "pdbfixer"),
         default="auto",
         help=(
-            "auto uses explicit backbone hydrogens if present, otherwise PDBFixer; "
+            "auto uses explicit donor hydrogens if present, otherwise PDBFixer; "
             "explicit never invokes PDBFixer; pdbfixer always invokes PDBFixer"
         ),
     )
     score_parser.add_argument("--ph", type=float, default=7.0, help="pH for PDBFixer hydrogenation")
+    score_parser.add_argument(
+        "--context-mode",
+        choices=(CONTEXT_MODE_FAST, CONTEXT_MODE_NONE),
+        default=CONTEXT_MODE_FAST,
+        help=(
+            "fast adds local solvent/packing/electrostatic/hydrophobic context fields; "
+            "none leaves context fields empty (default: fast)"
+        ),
+    )
+    score_parser.add_argument(
+        "--workers",
+        type=_positive_int,
+        default=1,
+        help="number of CPU worker processes for scoring/context work (default: 1)",
+    )
 
     prepare_parser = subparsers.add_parser(
         "prepare",
@@ -80,3 +113,13 @@ def build_parser() -> argparse.ArgumentParser:
     batch_parser.add_argument("batch_input", help="reserved for a future batch format")
 
     return parser
+
+
+def _positive_int(value: str) -> int:
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("must be a positive integer") from exc
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return parsed

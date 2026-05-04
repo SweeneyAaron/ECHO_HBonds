@@ -4,9 +4,11 @@ HBOND_CHEMEM/__init__.py
 HBOND_CHEMEM/__main__.py
 HBOND_CHEMEM/backbone_amide.py
 HBOND_CHEMEM/cli.py
+HBOND_CHEMEM/environment_context.py
 HBOND_CHEMEM/hydrogen.py
 HBOND_CHEMEM/pdb_io.py
 HBOND_CHEMEM/precompute_hbond_score_bounds.py
+HBOND_CHEMEM/protein_hbond_typing.py
 HBOND_CHEMEM/reference_hbond_score.py
 HBOND_CHEMEM/score_bounds.py
 HBOND_CHEMEM/data/HBOND_POLY_A.json
@@ -25,3 +27,4 @@ hbond_chemem.egg-info/entry_points.txt
 hbond_chemem.egg-info/requires.txt
 hbond_chemem.egg-info/top_level.txt
 tests/test_backbone_amide.py
+tests/test_env_grid_workers.py

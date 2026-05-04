@@ -2,12 +2,12 @@
 
 This folder now contains two related pieces:
 
-- the new backbone amide HBond CLI/package implemented in `backbone_amide.py`;
+- the protein HBond CLI/package implemented in `backbone_amide.py`;
 - the original `reference_hbond_score.py`, which remains a dependency-free
   reference for ChemEM's docking HBond branch.
 
 For installation, CLI usage, JSON/CSV fields, timing notes, and the uncapped
-backbone amide scorer, see the top-level `README.md`.
+protein HBond scorer, see the top-level `README.md`.
 
 This folder is a standalone reference for reproducing the hydrogen-bond part of the ChemEM docking score. It captures the data and logic needed to go from atom typing, to donor/acceptor pair identification, to the angle-dependent HBond Buckingham-style energy used by the active docking path.
 

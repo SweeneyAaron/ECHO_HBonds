@@ -1,14 +1,16 @@
-# Backbone Amide HBond Scoring
+# Protein HBond Scoring
 
-This repository scores backbone amide hydrogen bonds in protein PDB files with
-the ChemEM HBond polynomial scoring functions. It writes one JSON file and one
-CSV file containing atom identifiers, HBond geometry, and uncapped ChemEM HBond
-scores.
+This repository scores protein hydrogen bonds in PDB files with the ChemEM
+HBond polynomial scoring functions. It writes one JSON file and one CSV file
+containing atom identifiers, HBond geometry, uncapped ChemEM HBond scores, and
+fast local environment descriptors for downstream HDX correlation analysis.
 
-Only backbone peptide `N-H -> O` interactions are scored in v1. Side-chain
-amides, waters, ligands, and terminal `OXT` atoms are ignored. There is no
-sequence-separation or residue-locality filter: every backbone donor/acceptor
-pair can score if it passes the ChemEM distance and angle cutoffs.
+By default, the scorer reports HBonds where a nitrogen atom participates as
+either donor or acceptor. The selector can be expanded to oxygen, sulfur,
+specific PDB atom names, residue-qualified atom names, ChemEM type IDs, or all
+detected protein HBonds. Waters and ligands are ignored. There is no
+sequence-separation or residue-locality filter: every typed donor/acceptor pair
+can score if it passes the ChemEM distance and angle cutoffs.
 
 ## Environment
 
@@ -64,23 +66,51 @@ missing or when you explicitly run the preparation command.
 
 ## Run
 
-Score a PDB that already contains peptide hydrogens:
+Score a PDB that already contains donor hydrogens:
 
 ```bash
-python -m HBOND_CHEMEM score input_with_hydrogens.pdb --hydrogen-mode explicit --json hbonds.json --csv hbonds.csv
+python -m HBOND_CHEMEM score input_with_hydrogens.pdb --atom-types N --hydrogen-mode explicit --json hbonds.json --csv hbonds.csv
 ```
 
 Score a PDB and let the program add hydrogens with PDBFixer if none are present:
 
 ```bash
-python -m HBOND_CHEMEM score test_data/2erk.pdb --hydrogen-mode auto --json 2erk_hbonds.json --csv 2erk_hbonds.csv
+python -m HBOND_CHEMEM score test_data/2erk.pdb --atom-types N --hydrogen-mode auto --json 2erk_hbonds.json --csv 2erk_hbonds.csv
 ```
+
+Selector examples:
+
+```bash
+python -m HBOND_CHEMEM score input.pdb --atom-types N,O --json hbonds.json --csv hbonds.csv
+python -m HBOND_CHEMEM score input.pdb --atom-types SER:OG,LYS:NZ --json hbonds.json --csv hbonds.csv
+python -m HBOND_CHEMEM score input.pdb --atom-types 40,39 --json hbonds.json --csv hbonds.csv
+python -m HBOND_CHEMEM score input.pdb --atom-types ALL --json hbonds.json --csv hbonds.csv
+```
+
+Environment context fields are written by default. To write the same HBond rows
+with empty context fields, use:
+
+```bash
+python -m HBOND_CHEMEM score input.pdb --context-mode none --json hbonds.json --csv hbonds.csv
+```
+
+For larger structures, use multiple CPU processes for the Python scoring and
+fast-context loops:
+
+```bash
+python -m HBOND_CHEMEM score input.pdb --workers 4 --json hbonds.json --csv hbonds.csv
+```
+
+The default is `--workers 1`, which keeps the serial execution path. Worker
+requests above the available CPU count are accepted and capped internally; the
+JSON metadata records the requested worker count and the effective score/context
+worker counts used for the run.
 
 Prepare a hydrogenated PDB first, then run the fast explicit-H scoring path:
 
 ```bash
 python -m HBOND_CHEMEM prepare test_data/2erk.pdb --output 2erk_h.pdb --ph 7.0
-python -m HBOND_CHEMEM score 2erk_h.pdb --hydrogen-mode explicit --json 2erk_hbonds.json --csv 2erk_hbonds.csv
+python -m HBOND_CHEMEM score 2erk_h.pdb --atom-types N --hydrogen-mode explicit --json 2erk_hbonds.json --csv 2erk_hbonds.csv
 ```
 
 The installed console script is equivalent:
@@ -97,12 +127,27 @@ python -m HBOND_CHEMEM batch batch_input_placeholder
 
 ## Scoring Rules
 
-The program identifies:
+The program identifies common protein donors and acceptors:
 
-- donors: protein `ATOM` records with backbone atom `N` and at least one peptide
-  hydrogen named like `H`, `HN`, `H1`, `H2`, or `H3`;
-- acceptors: protein `ATOM` records with backbone atom `O`;
-- ChemEM atom types: donor `PEPTIDE_N = 40`, acceptor `PEPTIDE_O = 39`.
+- backbone `N` donors and backbone `O` acceptors;
+- side-chain donors/acceptors for common ASN/GLN, ARG, LYS, HIS, TRP, SER,
+  THR, TYR, CYS, ASP, GLU, and MET atoms where the role is chemically feasible;
+- donor hydrogens only when present explicitly or added by PDBFixer.
+
+The compact ChemEM type map includes backbone `N = 40`, backbone `O = 39`,
+amide side-chain `N = 43`, amide side-chain `O = 38`, generic/charged
+`O = 19`, aromatic/generic nitrogen types, and `S = 24`.
+
+`--atom-types` filters scored HBonds after donor/acceptor typing. A row is
+reported when the selected atom participates on either side of the HBond.
+Examples:
+
+- `N`: all HBonds involving nitrogen atoms;
+- `N,O`: all HBonds involving nitrogen or oxygen atoms;
+- `NZ` or `OG`: all HBonds involving those PDB atom names;
+- `SER:OG`: all HBonds involving that residue-qualified atom name;
+- `40`: all HBonds involving ChemEM type ID `40`;
+- `ALL` or `*`: no atom filter.
 
 For each candidate pair, the scorer requires:
 
@@ -128,15 +173,42 @@ normalized_score = clamp(-hbond_score / max_favorable_magnitude, 0, 1)
 
 The maximum favorable magnitudes are precomputed for every ChemEM HBond
 donor/acceptor table pair in
-`HBOND_CHEMEM/data/hbond_score_bounds.json`. For the current backbone scorer,
-the PEPTIDE_N `40` -> PEPTIDE_O `39` denominator is about `6.685645`.
+`HBOND_CHEMEM/data/hbond_score_bounds.json`.
+
+## Environment Context
+
+By default, `--context-mode fast` annotates each scored HBond with dependency-light
+local descriptors sampled directly around the donor hydrogen and the HBond
+midpoint. This is a fast approximation inspired by the heavier ChemEM
+environment-grid ideas; it does not build full grids and does not require
+NumPy, SciPy, ChemEM, or compiled grid extensions.
+
+The new fields are intended for empirical correlation with HDX experiments, not
+as a calibrated protection-factor model:
+
+- `env_h_sasa_fraction`: Shrake-Rupley-style exposure fraction around the donor
+  hydrogen;
+- `env_h_solvent_reach_fraction`: ray-based solvent-reach proxy from the donor
+  hydrogen;
+- `env_h_packing_count_6p5`: heavy-atom packing count within 6.5 A of the donor
+  hydrogen;
+- `env_h_electrostatic`: local Coulomb-like formal/polar charge proxy;
+- `env_h_hydrophobic`: local residue/element hydrophobicity proxy;
+- `env_mid_sasa_fraction`, `env_mid_electrostatic`, and
+  `env_mid_hydrophobic`: the corresponding midpoint context values.
+
+The donor atom, donor hydrogen, and acceptor atom for the scored HBond are
+excluded from the context calculations so the values describe the surrounding
+environment rather than the HBond itself. The JSON metadata records the context
+mode, constants, proxy models, and context timing for each run.
 
 ## Outputs
 
 The JSON file contains:
 
-- `metadata`: input path, hydrogen mode/source, cutoffs, ChemEM atom types,
-  counts, timing, `normalization_mode`, and `rep_cap_removed`;
+- `metadata`: input path, hydrogen mode/source, atom selector, cutoffs, ChemEM
+  donor/acceptor types present in the scored rows, context settings, counts,
+  timing, `normalization_mode`, and `rep_cap_removed`;
 - `hbonds`: one object per scored HBond.
 
 The CSV has the same one-row-per-HBond records. Important fields include:
@@ -147,7 +219,9 @@ The CSV has the same one-row-per-HBond records. Important fields include:
 - geometry: donor, hydrogen, and acceptor coordinates, donor-acceptor distance,
   hydrogen-acceptor distance, and donor-H-acceptor angle;
 - scoring values: donor/acceptor ChemEM types, evaluated `a_value`, `b_value`,
-  `c_value`, `hbond_score`, and `normalized_score`.
+  `c_value`, `hbond_score`, and `normalized_score`;
+- environment context values: the `env_h_*` and `env_mid_*` fields described
+  above.
 
 If PDBFixer generates a hydrogen, its id is stable and synthetic, for example:
 
@@ -156,13 +230,16 @@ generated:model:1:chain:A:42:_:H
 ```
 
 Original heavy atom serial numbers from the input PDB are preserved for donor
-`N` and acceptor `O` atoms whenever they can be mapped by chain, residue, and
-atom name.
+and acceptor atoms whenever they can be mapped by chain, residue, and atom name.
 
 ## Timing
 
 The approximate 1-second target applies to parsing, candidate search, scoring,
-and JSON/CSV output on a typical single protein. Hydrogenation with
+fast context annotation, and JSON/CSV output on a typical single protein.
+`--workers` can speed up larger CPU-bound scoring/context workloads, although
+small proteins may stay faster on the serial path because process startup has a
+cost.
+Hydrogenation with
 PDBFixer/OpenMM is measured separately because it is a structure-preparation
 step and may dominate cold-start runtime. For repeated runs, prepare hydrogens
 once and score the hydrogenated PDB with `--hydrogen-mode explicit`.
