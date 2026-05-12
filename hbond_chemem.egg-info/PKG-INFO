@@ -89,6 +89,30 @@ Score a PDB and let the program add hydrogens with PDBFixer if none are present:
 python -m HBOND_CHEMEM score test_data/2erk.pdb --atom-types N --hydrogen-mode auto --json 2erk_hbonds.json --csv 2erk_hbonds.csv
 ```
 
+When PDBFixer adds hydrogens, the default `--hydrogen-minimize auto` attempts a
+short OpenMM minimization with heavy atoms restrained and hydrogens free to
+relax. It tries Amber first, then CHARMM 2024 if Amber cannot parameterize the
+structure. To force CHARMM for modified residues such as phosphorylated `TPO` or
+`PTR`:
+
+```bash
+python -m HBOND_CHEMEM score test_data/2erk.pdb --hydrogen-forcefield charmm --json 2erk_hbonds.json --csv 2erk_hbonds.csv
+```
+
+The CHARMM path can add hydrogens for modified residues that already have
+installed CHARMM templates, including `TPO`, `PTR`, and `SEP`. RCSB/wwPDB CCD
+CIF files are used only for diagnostics/cache metadata for unsupported
+heterologous residues; the force-field parameters still need to come from
+OpenMM's installed force-field XML files. To skip minimization entirely:
+
+```bash
+python -m HBOND_CHEMEM score test_data/2erk.pdb --hydrogen-minimize none --json 2erk_hbonds.json --csv 2erk_hbonds.csv
+```
+
+Use `--hydrogen-minimize restrained` when unsupported residues should be a hard
+error instead of an automatic no-minimization fallback. Use `--ccd-cache` and
+`--ccd-online never` to force offline CCD diagnostics from an existing cache.
+
 Selector examples:
 
 ```bash
@@ -117,12 +141,36 @@ requests above the available CPU count are accepted and capped internally; the
 JSON metadata records the requested worker count and the effective score/context
 worker counts used for the run.
 
+The donor-acceptor heavy-atom distance cutoff defaults to `3.5 A`. Candidate
+pairs at or above this distance are skipped before angle and score evaluation.
+To relax or tighten it:
+
+```bash
+python -m HBOND_CHEMEM score input.pdb --hbond-distance-cutoff 4.0 --json hbonds.json --csv hbonds.csv
+```
+
+To reduce the output to one HBond per donor hydrogen, choose the selection
+criterion:
+
+```bash
+python -m HBOND_CHEMEM score input.pdb --hbond-per-donor-hydrogen best-distance --json hbonds.json --csv hbonds.csv
+python -m HBOND_CHEMEM score input.pdb --hbond-per-donor-hydrogen best-normalized-score --json hbonds.json --csv hbonds.csv
+```
+
+`best-distance` keeps the lowest donor-acceptor heavy-atom distance. If there is
+a tie, it prefers higher `normalized_score`, lower hydrogen-acceptor distance,
+and then higher angle before falling back to stable atom identity. Omitting the
+flag preserves the full one-row-per-scored-HBond output.
+
 Prepare a hydrogenated PDB first, then run the fast explicit-H scoring path:
 
 ```bash
-python -m HBOND_CHEMEM prepare test_data/2erk.pdb --output 2erk_h.pdb --ph 7.0
+python -m HBOND_CHEMEM prepare test_data/2erk.pdb --output 2erk_h.pdb --ph 7.0 --hydrogen-forcefield charmm
 python -m HBOND_CHEMEM score 2erk_h.pdb --atom-types N --hydrogen-mode explicit --json 2erk_hbonds.json --csv 2erk_hbonds.csv
 ```
+
+Use `--hydrogen-minimize none` on `prepare` when you only want PDBFixer-added
+hydrogens without the OpenMM minimization step.
 
 The installed console script is equivalent:
 
@@ -162,7 +210,8 @@ text selectors are strict PDB atom-name matches. Examples:
 
 For each candidate pair, the scorer requires:
 
-- donor-acceptor heavy atom distance `< 6.0 A`;
+- donor-acceptor heavy atom distance below `--hbond-distance-cutoff`
+  (`3.5 A` by default);
 - best donor-H-acceptor angle `> 110.0 degrees`.
 
 The score is:
@@ -219,7 +268,9 @@ The JSON file contains:
 
 - `metadata`: input path, hydrogen mode/source, atom selector, cutoffs, ChemEM
   donor/acceptor types present in the scored rows, context settings, counts,
-  timing, `normalization_mode`, and `rep_cap_removed`;
+  raw HBond candidate count before optional per-hydrogen selection, hydrogen
+  minimization settings, selected force field, CHARMM/CCD diagnostics, version
+  metadata, timing, `normalization_mode`, and `rep_cap_removed`;
 - `hbonds`: one object per scored HBond.
 
 The CSV has the same one-row-per-HBond records. Important fields include:

@@ -6,9 +6,22 @@ import argparse
 import math
 import sys
 
-from .backbone_amide import score_pdb, write_csv, write_json
+from .backbone_amide import (
+    HBOND_PER_DONOR_HYDROGEN_MODES,
+    score_pdb,
+    write_csv,
+    write_json,
+)
 from .environment_context import CONTEXT_MODE_FAST, CONTEXT_MODE_NONE
-from .hydrogen import add_hydrogens_with_pdbfixer
+from .hydrogen import (
+    CCD_ONLINE_AUTO,
+    CCD_ONLINE_MODES,
+    HYDROGEN_FORCEFIELD_AUTO,
+    HYDROGEN_FORCEFIELD_MODES,
+    HYDROGEN_MINIMIZE_AUTO,
+    HYDROGEN_MINIMIZE_MODES,
+    add_hydrogens_with_pdbfixer,
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -24,6 +37,11 @@ def main(argv: list[str] | None = None) -> int:
                 context_mode=args.context_mode,
                 workers=args.workers,
                 distance_cutoff=args.hbond_distance_cutoff,
+                hbond_per_donor_hydrogen=args.hbond_per_donor_hydrogen,
+                hydrogen_minimize=args.hydrogen_minimize,
+                hydrogen_forcefield=args.hydrogen_forcefield,
+                ccd_cache=args.ccd_cache,
+                ccd_online=args.ccd_online,
             )
             write_json(result, args.json)
             write_csv(result, args.csv)
@@ -43,7 +61,15 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 0
         if args.command == "prepare":
-            add_hydrogens_with_pdbfixer(args.input_pdb, args.output, ph=args.ph)
+            add_hydrogens_with_pdbfixer(
+                args.input_pdb,
+                args.output,
+                ph=args.ph,
+                minimize=args.hydrogen_minimize,
+                hydrogen_forcefield=args.hydrogen_forcefield,
+                ccd_cache=args.ccd_cache,
+                ccd_online=args.ccd_online,
+            )
             print(f"Wrote hydrogenated PDB to {args.output}")
             return 0
         if args.command == "batch":
@@ -88,6 +114,35 @@ def build_parser() -> argparse.ArgumentParser:
     )
     score_parser.add_argument("--ph", type=float, default=7.0, help="pH for PDBFixer hydrogenation")
     score_parser.add_argument(
+        "--hydrogen-minimize",
+        choices=tuple(sorted(HYDROGEN_MINIMIZE_MODES)),
+        default=HYDROGEN_MINIMIZE_AUTO,
+        help=(
+            "when PDBFixer adds hydrogens, attempt restrained OpenMM minimization, "
+            "require it, or skip it (default: auto)"
+        ),
+    )
+    score_parser.add_argument(
+        "--hydrogen-forcefield",
+        choices=tuple(sorted(HYDROGEN_FORCEFIELD_MODES)),
+        default=HYDROGEN_FORCEFIELD_AUTO,
+        help=(
+            "force field backend for hydrogen minimization; auto tries Amber, "
+            "then CHARMM if needed (default: auto)"
+        ),
+    )
+    score_parser.add_argument(
+        "--ccd-cache",
+        default=None,
+        help="directory for cached RCSB CCD CIF files used in CHARMM diagnostics",
+    )
+    score_parser.add_argument(
+        "--ccd-online",
+        choices=tuple(sorted(CCD_ONLINE_MODES)),
+        default=CCD_ONLINE_AUTO,
+        help="whether CHARMM diagnostics may fetch missing CCD files (default: auto)",
+    )
+    score_parser.add_argument(
         "--context-mode",
         choices=(CONTEXT_MODE_FAST, CONTEXT_MODE_NONE),
         default=CONTEXT_MODE_FAST,
@@ -108,6 +163,15 @@ def build_parser() -> argparse.ArgumentParser:
         default=3.5,
         help="maximum donor-acceptor heavy atom distance in Angstrom before scoring (default: 3.5)",
     )
+    score_parser.add_argument(
+        "--hbond-per-donor-hydrogen",
+        choices=tuple(sorted(HBOND_PER_DONOR_HYDROGEN_MODES)),
+        default=None,
+        help=(
+            "reduce output to one HBond per donor hydrogen using the selected criterion; "
+            "omitted reports all scored HBonds"
+        ),
+    )
 
     prepare_parser = subparsers.add_parser(
         "prepare",
@@ -116,6 +180,32 @@ def build_parser() -> argparse.ArgumentParser:
     prepare_parser.add_argument("input_pdb", help="input PDB file")
     prepare_parser.add_argument("--output", required=True, help="hydrogenated PDB output path")
     prepare_parser.add_argument("--ph", type=float, default=7.0, help="pH for PDBFixer hydrogenation")
+    prepare_parser.add_argument(
+        "--hydrogen-minimize",
+        choices=tuple(sorted(HYDROGEN_MINIMIZE_MODES)),
+        default=HYDROGEN_MINIMIZE_AUTO,
+        help="attempt, require, or skip restrained OpenMM minimization (default: auto)",
+    )
+    prepare_parser.add_argument(
+        "--hydrogen-forcefield",
+        choices=tuple(sorted(HYDROGEN_FORCEFIELD_MODES)),
+        default=HYDROGEN_FORCEFIELD_AUTO,
+        help=(
+            "force field backend for hydrogen minimization; auto tries Amber, "
+            "then CHARMM if needed (default: auto)"
+        ),
+    )
+    prepare_parser.add_argument(
+        "--ccd-cache",
+        default=None,
+        help="directory for cached RCSB CCD CIF files used in CHARMM diagnostics",
+    )
+    prepare_parser.add_argument(
+        "--ccd-online",
+        choices=tuple(sorted(CCD_ONLINE_MODES)),
+        default=CCD_ONLINE_AUTO,
+        help="whether CHARMM diagnostics may fetch missing CCD files (default: auto)",
+    )
 
     batch_parser = subparsers.add_parser("batch", help="batch scoring stub")
     batch_parser.add_argument("batch_input", help="reserved for a future batch format")

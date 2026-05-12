@@ -24,6 +24,15 @@ from .environment_context import (
     fast_context_metadata,
 )
 from .hydrogen import add_hydrogens_with_pdbfixer
+from .hydrogen import (
+    CCD_ONLINE_AUTO,
+    HYDROGEN_FORCEFIELD_AUTO,
+    HYDROGEN_MINIMIZE_AUTO,
+    hydrogen_minimization_metadata,
+    validate_ccd_online,
+    validate_hydrogen_forcefield,
+    validate_hydrogen_minimize,
+)
 from .protein_hbond_typing import (
     AtomSelector,
     PEPTIDE_N_TYPE,
@@ -40,6 +49,12 @@ from .score_bounds import NORMALIZATION_MODE, load_score_bounds, normalize_hbond
 
 DISTANCE_CUTOFF = 3.5
 ANGLE_CUTOFF = 110.0
+HBOND_PER_DONOR_HYDROGEN_BEST_DISTANCE = "best-distance"
+HBOND_PER_DONOR_HYDROGEN_BEST_NORMALIZED_SCORE = "best-normalized-score"
+HBOND_PER_DONOR_HYDROGEN_MODES = {
+    HBOND_PER_DONOR_HYDROGEN_BEST_DISTANCE,
+    HBOND_PER_DONOR_HYDROGEN_BEST_NORMALIZED_SCORE,
+}
 
 CSV_FIELDS = [
     "model_id",
@@ -153,13 +168,16 @@ class ScoreResult:
     input_path: str
     hydrogen_mode: str
     hydrogen_source: str
+    hydrogen_minimization: dict[str, object]
     atom_types: str
+    hbond_per_donor_hydrogen: str | None
     context_mode: str
     context_metadata: dict[str, object]
     requested_workers: int
     effective_score_workers: int
     effective_context_workers: int
     distance_cutoff: float
+    raw_hbond_count: int
     hbonds: list[ProteinHBond]
     counts: dict[str, int]
     timing_seconds: dict[str, float]
@@ -170,7 +188,10 @@ class ScoreResult:
                 "input_path": self.input_path,
                 "hydrogen_mode": self.hydrogen_mode,
                 "hydrogen_source": self.hydrogen_source,
+                "hydrogen_minimization": self.hydrogen_minimization,
                 "atom_types": self.atom_types,
+                "hbond_per_donor_hydrogen": self.hbond_per_donor_hydrogen,
+                "raw_hbond_candidates": self.raw_hbond_count,
                 "distance_cutoff": self.distance_cutoff,
                 "angle_cutoff": ANGLE_CUTOFF,
                 "donor_types": sorted({hbond.donor_type for hbond in self.hbonds}),
@@ -200,6 +221,11 @@ def score_pdb(
     context_mode: str = CONTEXT_MODE_FAST,
     workers: int = 1,
     distance_cutoff: float = DISTANCE_CUTOFF,
+    hbond_per_donor_hydrogen: str | None = None,
+    hydrogen_minimize: str = HYDROGEN_MINIMIZE_AUTO,
+    hydrogen_forcefield: str = HYDROGEN_FORCEFIELD_AUTO,
+    ccd_cache: str | Path | None = None,
+    ccd_online: str = CCD_ONLINE_AUTO,
 ) -> ScoreResult:
     """Load a PDB file, optionally add hydrogens, and score protein HBonds."""
 
@@ -208,6 +234,10 @@ def score_pdb(
     _validate_context_mode(context_mode)
     requested_workers = _validate_workers(workers)
     distance_cutoff = _validate_positive_float(distance_cutoff, "distance_cutoff")
+    hbond_per_donor_hydrogen = _validate_hbond_per_donor_hydrogen(hbond_per_donor_hydrogen)
+    hydrogen_minimize = validate_hydrogen_minimize(hydrogen_minimize)
+    hydrogen_forcefield = validate_hydrogen_forcefield(hydrogen_forcefield)
+    ccd_online = validate_ccd_online(ccd_online)
     selector = parse_atom_selector(atom_types)
 
     input_path = Path(input_path)
@@ -218,6 +248,13 @@ def score_pdb(
 
     hydrogen_source = "explicit"
     hydrogen_seconds = 0.0
+    hydrogen_minimization = hydrogen_minimization_metadata(
+        hydrogen_minimize,
+        ran=False,
+        requested_forcefield=hydrogen_forcefield,
+        ccd_cache=str(ccd_cache) if ccd_cache is not None else None,
+        ccd_online=ccd_online,
+    )
     if hydrogen_mode == "pdbfixer" or (
         hydrogen_mode == "auto" and not _has_relevant_explicit_donors(structure, selector)
     ):
@@ -225,17 +262,26 @@ def score_pdb(
         hydrogen_start = time.perf_counter()
         with tempfile.TemporaryDirectory() as tmpdir:
             hydrated_path = Path(tmpdir) / "hydrated.pdb"
-            add_hydrogens_with_pdbfixer(input_path, hydrated_path, ph=ph)
+            hydrogen_minimization = add_hydrogens_with_pdbfixer(
+                input_path,
+                hydrated_path,
+                ph=ph,
+                minimize=hydrogen_minimize,
+                hydrogen_forcefield=hydrogen_forcefield,
+                ccd_cache=ccd_cache,
+                ccd_online=ccd_online,
+            )
             hydrated = parse_pdb(hydrated_path)
         structure = hydrated.with_original_heavy_atom_ids(structure)
         hydrogen_seconds = time.perf_counter() - hydrogen_start
 
     score_start = time.perf_counter()
-    hbonds, effective_score_workers = _score_structure_base_with_worker_count(
+    hbonds, effective_score_workers, raw_hbond_count = _score_structure_base_with_worker_count(
         structure,
         atom_types=selector.raw,
         distance_cutoff=distance_cutoff,
         workers=requested_workers,
+        hbond_per_donor_hydrogen=hbond_per_donor_hydrogen,
     )
     score_seconds = time.perf_counter() - score_start
 
@@ -268,19 +314,23 @@ def score_pdb(
         ),
         "backbone_donors": sum(1 for donor in donors if donor.atom.name == "N"),
         "backbone_acceptors": sum(1 for acceptor in acceptors if acceptor.atom.name == "O"),
+        "raw_hbonds": raw_hbond_count,
         "hbonds": len(hbonds),
     }
     return ScoreResult(
         input_path=str(input_path),
         hydrogen_mode=hydrogen_mode,
         hydrogen_source=hydrogen_source,
+        hydrogen_minimization=hydrogen_minimization,
         atom_types=selector.raw,
+        hbond_per_donor_hydrogen=hbond_per_donor_hydrogen,
         context_mode=context_mode,
         context_metadata=fast_context_metadata(context_mode),
         requested_workers=requested_workers,
         effective_score_workers=effective_score_workers,
         effective_context_workers=effective_context_workers,
         distance_cutoff=distance_cutoff,
+        raw_hbond_count=raw_hbond_count,
         hbonds=hbonds,
         counts=counts,
         timing_seconds=timing,
@@ -295,6 +345,7 @@ def score_structure(
     angle_cutoff: float = ANGLE_CUTOFF,
     context_mode: str = CONTEXT_MODE_FAST,
     workers: int = 1,
+    hbond_per_donor_hydrogen: str | None = None,
 ) -> list[ProteinHBond]:
     """Score protein HBonds where the selected atom participates."""
 
@@ -307,6 +358,7 @@ def score_structure(
         distance_cutoff=distance_cutoff,
         angle_cutoff=angle_cutoff,
         workers=requested_workers,
+        hbond_per_donor_hydrogen=hbond_per_donor_hydrogen,
     )
     if context_mode == CONTEXT_MODE_FAST:
         return _with_environment_context(structure, hbonds, workers=requested_workers)
@@ -320,15 +372,17 @@ def _score_structure_base(
     distance_cutoff: float = DISTANCE_CUTOFF,
     angle_cutoff: float = ANGLE_CUTOFF,
     workers: int = 1,
+    hbond_per_donor_hydrogen: str | None = None,
 ) -> list[ProteinHBond]:
     """Score protein HBonds without adding environment context fields."""
 
-    hbonds, _ = _score_structure_base_with_worker_count(
+    hbonds, _, _ = _score_structure_base_with_worker_count(
         structure,
         atom_types=atom_types,
         distance_cutoff=distance_cutoff,
         angle_cutoff=angle_cutoff,
         workers=workers,
+        hbond_per_donor_hydrogen=hbond_per_donor_hydrogen,
     )
     return hbonds
 
@@ -340,10 +394,12 @@ def _score_structure_base_with_worker_count(
     distance_cutoff: float = DISTANCE_CUTOFF,
     angle_cutoff: float = ANGLE_CUTOFF,
     workers: int = 1,
-) -> tuple[list[ProteinHBond], int]:
+    hbond_per_donor_hydrogen: str | None = None,
+) -> tuple[list[ProteinHBond], int, int]:
     """Score protein HBonds and report the effective worker count used."""
 
     distance_cutoff = _validate_positive_float(distance_cutoff, "distance_cutoff")
+    hbond_per_donor_hydrogen = _validate_hbond_per_donor_hydrogen(hbond_per_donor_hydrogen)
     selector = parse_atom_selector(atom_types)
     tables = load_tables()
     score_bounds = load_score_bounds()
@@ -362,6 +418,7 @@ def _score_structure_base_with_worker_count(
             acceptor_grid,
             distance_cutoff,
             angle_cutoff,
+            hbond_per_donor_hydrogen,
         )
     else:
         hbonds = []
@@ -375,6 +432,7 @@ def _score_structure_base_with_worker_count(
                 acceptor_grid,
                 distance_cutoff,
                 angle_cutoff,
+                hbond_per_donor_hydrogen,
             )
             for chunk in chunks
         ]
@@ -392,21 +450,15 @@ def _score_structure_base_with_worker_count(
                 acceptor_grid,
                 distance_cutoff,
                 angle_cutoff,
+                hbond_per_donor_hydrogen,
             )
 
-    hbonds.sort(
-        key=lambda item: (
-            item.model_id,
-            item.donor.chain_id,
-            item.donor.res_seq,
-            item.donor.name,
-            item.acceptor.chain_id,
-            item.acceptor.res_seq,
-            item.acceptor.name,
-            str(item.acceptor.serial),
-        )
-    )
-    return hbonds, effective_workers
+    raw_hbond_count = len(hbonds)
+    if hbond_per_donor_hydrogen is not None:
+        hbonds = _select_one_hbond_per_donor_hydrogen(hbonds, hbond_per_donor_hydrogen)
+
+    _sort_hbonds(hbonds)
+    return hbonds, effective_workers, raw_hbond_count
 
 
 def _score_donor_chunk_from_args(args: tuple[object, ...]) -> list[ProteinHBond]:
@@ -421,6 +473,7 @@ def _score_donor_chunk(
     acceptor_grid: Mapping[tuple[int, int, int], list[ProteinAcceptor]],
     distance_cutoff: float,
     angle_cutoff: float,
+    hbond_per_donor_hydrogen: str | None,
 ) -> list[ProteinHBond]:
     cutoff2 = distance_cutoff * distance_cutoff
     hbonds: list[ProteinHBond] = []
@@ -448,52 +501,175 @@ def _score_donor_chunk(
             if donor_acceptor_distance2 >= cutoff2:
                 continue
 
-            best_hydrogen = None
-            best_angle = -1.0
-            for hydrogen in donor.hydrogens:
-                angle = calc_bond_angle(donor.atom.xyz, hydrogen.xyz, acceptor.atom.xyz)
-                if angle > best_angle:
-                    best_angle = angle
-                    best_hydrogen = hydrogen
+            donor_acceptor_distance = math.sqrt(donor_acceptor_distance2)
+            if hbond_per_donor_hydrogen is None:
+                best_hydrogen = None
+                best_angle = -1.0
+                for hydrogen in donor.hydrogens:
+                    angle = calc_bond_angle(donor.atom.xyz, hydrogen.xyz, acceptor.atom.xyz)
+                    if angle > best_angle:
+                        best_angle = angle
+                        best_hydrogen = hydrogen
 
-            if best_hydrogen is None or best_angle <= angle_cutoff:
+                if best_hydrogen is None or best_angle <= angle_cutoff:
+                    continue
+                hbonds.append(
+                    _build_hbond(
+                        donor,
+                        best_hydrogen,
+                        acceptor,
+                        donor_acceptor_distance,
+                        best_angle,
+                        coeff_a,
+                        coeff_b,
+                        coeff_c,
+                        score_bounds,
+                    )
+                )
                 continue
 
-            donor_acceptor_distance = math.sqrt(donor_acceptor_distance2)
-            a_value = eval_poly(coeff_a, best_angle)
-            b_value = eval_poly(coeff_b, best_angle)
-            c_value = eval_poly(coeff_c, best_angle)
-            hbond_score = chemem_hbond_score(
-                a_value,
-                b_value,
-                c_value,
-                donor_acceptor_distance,
-            )
-            normalized_score = normalize_hbond_score(
-                hbond_score,
-                donor.atom_type,
-                acceptor.atom_type,
-                score_bounds,
-            )
-            hbonds.append(
-                ProteinHBond(
-                    model_id=donor.atom.model_id,
-                    donor=donor.atom,
-                    hydrogen=best_hydrogen,
-                    acceptor=acceptor.atom,
-                    donor_type=donor.atom_type,
-                    acceptor_type=acceptor.atom_type,
-                    donor_acceptor_distance=donor_acceptor_distance,
-                    hydrogen_acceptor_distance=distance(best_hydrogen.xyz, acceptor.atom.xyz),
-                    dha_angle=best_angle,
-                    a_value=a_value,
-                    b_value=b_value,
-                    c_value=c_value,
-                    hbond_score=hbond_score,
-                    normalized_score=normalized_score,
+            for hydrogen in donor.hydrogens:
+                angle = calc_bond_angle(donor.atom.xyz, hydrogen.xyz, acceptor.atom.xyz)
+                if angle <= angle_cutoff:
+                    continue
+                hbonds.append(
+                    _build_hbond(
+                        donor,
+                        hydrogen,
+                        acceptor,
+                        donor_acceptor_distance,
+                        angle,
+                        coeff_a,
+                        coeff_b,
+                        coeff_c,
+                        score_bounds,
+                    )
                 )
-            )
     return hbonds
+
+
+def _build_hbond(
+    donor: ProteinDonor,
+    hydrogen: Atom,
+    acceptor: ProteinAcceptor,
+    donor_acceptor_distance: float,
+    angle: float,
+    coeff_a: Sequence[float],
+    coeff_b: Sequence[float],
+    coeff_c: Sequence[float],
+    score_bounds: dict[str, object],
+) -> ProteinHBond:
+    a_value = eval_poly(coeff_a, angle)
+    b_value = eval_poly(coeff_b, angle)
+    c_value = eval_poly(coeff_c, angle)
+    hbond_score = chemem_hbond_score(
+        a_value,
+        b_value,
+        c_value,
+        donor_acceptor_distance,
+    )
+    normalized_score = normalize_hbond_score(
+        hbond_score,
+        donor.atom_type,
+        acceptor.atom_type,
+        score_bounds,
+    )
+    return ProteinHBond(
+        model_id=donor.atom.model_id,
+        donor=donor.atom,
+        hydrogen=hydrogen,
+        acceptor=acceptor.atom,
+        donor_type=donor.atom_type,
+        acceptor_type=acceptor.atom_type,
+        donor_acceptor_distance=donor_acceptor_distance,
+        hydrogen_acceptor_distance=distance(hydrogen.xyz, acceptor.atom.xyz),
+        dha_angle=angle,
+        a_value=a_value,
+        b_value=b_value,
+        c_value=c_value,
+        hbond_score=hbond_score,
+        normalized_score=normalized_score,
+    )
+
+
+def _select_one_hbond_per_donor_hydrogen(
+    hbonds: Sequence[ProteinHBond],
+    mode: str,
+) -> list[ProteinHBond]:
+    mode = _validate_hbond_per_donor_hydrogen(mode)
+    if mode is None:
+        return list(hbonds)
+    selected: dict[tuple[object, ...], ProteinHBond] = {}
+    for hbond in hbonds:
+        donor_hydrogen_key = _donor_hydrogen_key(hbond)
+        current = selected.get(donor_hydrogen_key)
+        if current is None or _hbond_selection_key(hbond, mode) < _hbond_selection_key(current, mode):
+            selected[donor_hydrogen_key] = hbond
+    selected_hbonds = list(selected.values())
+    _sort_hbonds(selected_hbonds)
+    return selected_hbonds
+
+
+def _hbond_selection_key(hbond: ProteinHBond, mode: str) -> tuple[object, ...]:
+    acceptor_key = _acceptor_sort_key(hbond)
+    if mode == HBOND_PER_DONOR_HYDROGEN_BEST_DISTANCE:
+        return (
+            hbond.donor_acceptor_distance,
+            -hbond.normalized_score,
+            hbond.hydrogen_acceptor_distance,
+            -hbond.dha_angle,
+            acceptor_key,
+        )
+    if mode == HBOND_PER_DONOR_HYDROGEN_BEST_NORMALIZED_SCORE:
+        return (
+            -hbond.normalized_score,
+            hbond.hbond_score,
+            hbond.donor_acceptor_distance,
+            hbond.hydrogen_acceptor_distance,
+            -hbond.dha_angle,
+            acceptor_key,
+        )
+    raise ValueError(f"unsupported hbond_per_donor_hydrogen mode: {mode}")
+
+
+def _donor_hydrogen_key(hbond: ProteinHBond) -> tuple[object, ...]:
+    return (
+        hbond.model_id,
+        hbond.donor.chain_id,
+        hbond.donor.res_seq,
+        hbond.donor.ins_code,
+        hbond.donor.res_name,
+        hbond.donor.name,
+        hbond.hydrogen.name,
+        str(hbond.hydrogen.atom_id),
+    )
+
+
+def _acceptor_sort_key(hbond: ProteinHBond) -> tuple[object, ...]:
+    return (
+        hbond.acceptor.model_id,
+        hbond.acceptor.chain_id,
+        hbond.acceptor.res_seq,
+        hbond.acceptor.ins_code,
+        hbond.acceptor.res_name,
+        hbond.acceptor.name,
+        str(hbond.acceptor.atom_id),
+    )
+
+
+def _sort_hbonds(hbonds: list[ProteinHBond]) -> None:
+    hbonds.sort(
+        key=lambda item: (
+            item.model_id,
+            item.donor.chain_id,
+            item.donor.res_seq,
+            item.donor.name,
+            item.acceptor.chain_id,
+            item.acceptor.res_seq,
+            item.acceptor.name,
+            str(item.acceptor.serial),
+        )
+    )
 
 
 def _with_environment_context(
@@ -589,6 +765,15 @@ def _validate_context_mode(context_mode: str) -> None:
     if context_mode not in CONTEXT_MODES:
         modes = ", ".join(sorted(CONTEXT_MODES))
         raise ValueError(f"context_mode must be one of: {modes}")
+
+
+def _validate_hbond_per_donor_hydrogen(value: str | None) -> str | None:
+    if value in {None, "", "none"}:
+        return None
+    if value not in HBOND_PER_DONOR_HYDROGEN_MODES:
+        modes = ", ".join(sorted(HBOND_PER_DONOR_HYDROGEN_MODES))
+        raise ValueError(f"hbond_per_donor_hydrogen must be one of: {modes}")
+    return value
 
 
 def chemem_hbond_score(

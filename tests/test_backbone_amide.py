@@ -4,10 +4,13 @@ import contextlib
 import csv
 import io
 import json
+import sys
 import tempfile
 import time
 import unittest
 from pathlib import Path
+from types import ModuleType, SimpleNamespace
+from unittest import mock
 
 from HBOND_CHEMEM.cli import build_parser, main
 from HBOND_CHEMEM.backbone_amide import (
@@ -20,6 +23,11 @@ from HBOND_CHEMEM.backbone_amide import (
     write_json,
 )
 from HBOND_CHEMEM.environment_context import CONTEXT_FIELDS
+from HBOND_CHEMEM.hydrogen import (
+    _charmm_template_hydrogen_variants,
+    _lookup_ccd_component,
+    add_hydrogens_with_pdbfixer,
+)
 from HBOND_CHEMEM.pdb_io import find_backbone_donors, parse_pdb
 from HBOND_CHEMEM.protein_hbond_typing import parse_atom_selector
 from HBOND_CHEMEM.reference_hbond_score import eval_poly, load_tables
@@ -93,6 +101,77 @@ def two_hbond_lines() -> list[str]:
         pdb_atom(21, "HG", "SER", "A", 20, 21.0, 0.0, 0.0, "H"),
         pdb_atom(22, "OD1", "ASP", "A", 21, 22.8, 0.0, 0.0, "O"),
     ]
+
+
+def competing_acceptor_lines() -> list[str]:
+    return [
+        pdb_atom(1, "N", "ALA", "A", 1, 0.0, 0.0, 0.0, "N"),
+        pdb_atom(2, "H", "ALA", "A", 1, 1.0, 0.0, 0.0, "H"),
+        pdb_atom(3, "CA", "ALA", "A", 1, 0.0, 1.0, 0.0, "C"),
+        pdb_atom(4, "O", "GLY", "A", 2, 2.8, 0.0, 0.0, "O"),
+        pdb_atom(5, "O", "SER", "A", 3, 2.4, 1.0, 0.0, "O"),
+    ]
+
+
+def two_hydrogen_donor_lines() -> list[str]:
+    return [
+        pdb_atom(1, "NZ", "LYS", "A", 1, 0.0, 0.0, 0.0, "N"),
+        pdb_atom(2, "HZ1", "LYS", "A", 1, 1.0, 0.0, 0.0, "H"),
+        pdb_atom(3, "HZ2", "LYS", "A", 1, -1.0, 0.0, 0.0, "H"),
+        pdb_atom(4, "O", "GLY", "A", 2, 2.8, 0.0, 0.0, "O"),
+        pdb_atom(5, "O", "SER", "A", 3, -2.8, 0.0, 0.0, "O"),
+    ]
+
+
+def module(name: str, **attrs) -> ModuleType:
+    value = ModuleType(name)
+    for key, attr_value in attrs.items():
+        setattr(value, key, attr_value)
+    return value
+
+
+class FakeOpenMMElement:
+    def __init__(self, symbol: str) -> None:
+        self.symbol = symbol
+
+
+class FakeOpenMMAtom:
+    def __init__(self, name: str, symbol: str) -> None:
+        self.name = name
+        self.element = FakeOpenMMElement(symbol)
+
+
+class FakeOpenMMChain:
+    def __init__(self, chain_id: str = "A") -> None:
+        self.id = chain_id
+
+
+class FakeOpenMMResidue:
+    def __init__(self, name: str, atoms: list[FakeOpenMMAtom], index: int = 0) -> None:
+        self.name = name
+        self.index = index
+        self.id = str(index + 1)
+        self.insertionCode = ""
+        self.chain = FakeOpenMMChain()
+        self._atoms = atoms
+
+    def atoms(self):
+        return iter(self._atoms)
+
+
+class FakeOpenMMTopology:
+    def __init__(self, residues: list[FakeOpenMMResidue]) -> None:
+        self._residues = residues
+
+    def residues(self):
+        return iter(self._residues)
+
+
+class FakeOpenMMTemplate:
+    def __init__(self, atoms: list[FakeOpenMMAtom], bonds: list[tuple[int, int]]) -> None:
+        self.atoms = atoms
+        self.bonds = bonds
+        self.atomIndices = {atom.name: index for index, atom in enumerate(atoms)}
 
 
 class BackboneAmideTests(unittest.TestCase):
@@ -217,6 +296,48 @@ class BackboneAmideTests(unittest.TestCase):
         self.assertEqual(default_hbonds, [])
         self.assertEqual(len(relaxed_hbonds), 1)
         self.assertAlmostEqual(relaxed_hbonds[0].donor_acceptor_distance, 4.0)
+
+    def test_one_hbond_per_donor_hydrogen_can_select_best_distance(self) -> None:
+        structure = parse_pdb(write_temp_pdb(competing_acceptor_lines()))
+
+        all_hbonds = score_structure(structure, context_mode="none")
+        selected = score_structure(
+            structure,
+            context_mode="none",
+            hbond_per_donor_hydrogen="best-distance",
+        )
+
+        self.assertEqual(len(all_hbonds), 2)
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(selected[0].acceptor.res_seq, 3)
+        self.assertLess(selected[0].donor_acceptor_distance, 2.7)
+
+    def test_one_hbond_per_donor_hydrogen_can_select_best_normalized_score(self) -> None:
+        structure = parse_pdb(write_temp_pdb(competing_acceptor_lines()))
+
+        selected = score_structure(
+            structure,
+            context_mode="none",
+            hbond_per_donor_hydrogen="best-normalized-score",
+        )
+
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(selected[0].acceptor.res_seq, 2)
+        self.assertGreater(selected[0].normalized_score, 0.8)
+
+    def test_one_hbond_per_donor_hydrogen_groups_by_hydrogen_not_heavy_donor(self) -> None:
+        structure = parse_pdb(write_temp_pdb(two_hydrogen_donor_lines()))
+
+        selected = score_structure(
+            structure,
+            atom_types="ALL",
+            context_mode="none",
+            hbond_per_donor_hydrogen="best-distance",
+        )
+
+        self.assertEqual(len(selected), 2)
+        self.assertEqual({hbond.hydrogen.name for hbond in selected}, {"HZ1", "HZ2"})
+        self.assertEqual({hbond.acceptor.res_seq for hbond in selected}, {2, 3})
 
     def test_atom_selectors_filter_by_participating_atom(self) -> None:
         path = write_temp_pdb(
@@ -437,6 +558,23 @@ class BackboneAmideTests(unittest.TestCase):
 
         self.assertEqual(result.to_json_dict()["metadata"]["distance_cutoff"], 4.5)
 
+    def test_hbond_per_donor_hydrogen_metadata_records_raw_and_final_counts(self) -> None:
+        result = score_pdb(
+            write_temp_pdb(competing_acceptor_lines()),
+            hydrogen_mode="explicit",
+            context_mode="none",
+            hbond_per_donor_hydrogen="best-distance",
+            hydrogen_minimize="none",
+        )
+        metadata = result.to_json_dict()["metadata"]
+
+        self.assertEqual(metadata["hbond_per_donor_hydrogen"], "best-distance")
+        self.assertEqual(metadata["raw_hbond_candidates"], 2)
+        self.assertEqual(metadata["counts"]["raw_hbonds"], 2)
+        self.assertEqual(metadata["counts"]["hbonds"], 1)
+        self.assertEqual(metadata["hydrogen_minimization"]["mode"], "none")
+        self.assertFalse(metadata["hydrogen_minimization"]["ran"])
+
     def test_cli_workers_flag_writes_matching_outputs(self) -> None:
         input_path = write_temp_pdb(two_hbond_lines())
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -472,6 +610,48 @@ class BackboneAmideTests(unittest.TestCase):
         self.assertEqual(data["metadata"]["distance_cutoff"], 4.5)
         self.assertEqual(len(data["hbonds"]), len(rows))
         self.assertEqual(len(data["hbonds"]), 2)
+
+    def test_cli_hbond_reduction_flag_writes_matching_outputs_and_metadata(self) -> None:
+        input_path = write_temp_pdb(competing_acceptor_lines())
+        with tempfile.TemporaryDirectory() as tmpdir:
+            json_path = Path(tmpdir) / "hbonds.json"
+            csv_path = Path(tmpdir) / "hbonds.csv"
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "score",
+                        str(input_path),
+                        "--hydrogen-mode",
+                        "explicit",
+                        "--hydrogen-minimize",
+                        "none",
+                        "--hydrogen-forcefield",
+                        "charmm",
+                        "--ccd-online",
+                        "never",
+                        "--hbond-per-donor-hydrogen",
+                        "best-distance",
+                        "--context-mode",
+                        "none",
+                        "--json",
+                        str(json_path),
+                        "--csv",
+                        str(csv_path),
+                    ]
+                )
+
+            data = json.loads(json_path.read_text())
+            with csv_path.open() as handle:
+                rows = list(csv.DictReader(handle))
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(data["metadata"]["hbond_per_donor_hydrogen"], "best-distance")
+        self.assertEqual(data["metadata"]["hydrogen_minimization"]["requested_forcefield"], "charmm")
+        self.assertEqual(data["metadata"]["hydrogen_minimization"]["ccd_online"], "never")
+        self.assertEqual(data["metadata"]["counts"]["raw_hbonds"], 2)
+        self.assertEqual(len(data["hbonds"]), 1)
+        self.assertEqual(len(rows), 1)
 
     def test_cli_rejects_invalid_workers(self) -> None:
         stderr = io.StringIO()
@@ -510,6 +690,338 @@ class BackboneAmideTests(unittest.TestCase):
                 )
 
         self.assertIn("positive number", stderr.getvalue())
+
+    def test_cli_rejects_invalid_hbond_reduction_mode(self) -> None:
+        stderr = io.StringIO()
+        with self.assertRaises(SystemExit):
+            with contextlib.redirect_stderr(stderr):
+                build_parser().parse_args(
+                    [
+                        "score",
+                        "input.pdb",
+                        "--hbond-per-donor-hydrogen",
+                        "nearest-ish",
+                        "--json",
+                        "out.json",
+                        "--csv",
+                        "out.csv",
+                    ]
+                )
+
+        self.assertIn("invalid choice", stderr.getvalue())
+
+    def test_rejects_invalid_python_api_modes(self) -> None:
+        structure = parse_pdb(write_temp_pdb(simple_hbond_lines()))
+
+        with self.assertRaisesRegex(ValueError, "hbond_per_donor_hydrogen"):
+            score_structure(
+                structure,
+                context_mode="none",
+                hbond_per_donor_hydrogen="nearest-ish",
+            )
+        with self.assertRaisesRegex(ValueError, "hydrogen_minimize"):
+            score_pdb(
+                write_temp_pdb(simple_hbond_lines()),
+                hydrogen_mode="explicit",
+                hydrogen_minimize="aggressive-ish",
+            )
+        with self.assertRaisesRegex(ValueError, "hydrogen_forcefield"):
+            score_pdb(
+                write_temp_pdb(simple_hbond_lines()),
+                hydrogen_mode="explicit",
+                hydrogen_forcefield="martini-ish",
+            )
+        with self.assertRaisesRegex(ValueError, "ccd_online"):
+            score_pdb(
+                write_temp_pdb(simple_hbond_lines()),
+                hydrogen_mode="explicit",
+                ccd_online="sometimes-ish",
+            )
+
+    def test_charmm_template_variants_add_one_set_per_modified_residue(self) -> None:
+        residue = FakeOpenMMResidue(
+            "TPO",
+            [
+                FakeOpenMMAtom("N", "N"),
+                FakeOpenMMAtom("CA", "C"),
+                FakeOpenMMAtom("CB", "C"),
+                FakeOpenMMAtom("OG1", "O"),
+                FakeOpenMMAtom("P", "P"),
+                FakeOpenMMAtom("O1P", "O"),
+                FakeOpenMMAtom("O2P", "O"),
+                FakeOpenMMAtom("O3P", "O"),
+                FakeOpenMMAtom("CG2", "C"),
+                FakeOpenMMAtom("C", "C"),
+                FakeOpenMMAtom("O", "O"),
+            ],
+            index=4,
+        )
+        template = FakeOpenMMTemplate(
+            [
+                FakeOpenMMAtom("N", "N"),
+                FakeOpenMMAtom("HN", "H"),
+                FakeOpenMMAtom("CA", "C"),
+                FakeOpenMMAtom("HA", "H"),
+                FakeOpenMMAtom("CB", "C"),
+                FakeOpenMMAtom("HB", "H"),
+                FakeOpenMMAtom("OG1", "O"),
+                FakeOpenMMAtom("P", "P"),
+                FakeOpenMMAtom("O1P", "O"),
+                FakeOpenMMAtom("O2P", "O"),
+                FakeOpenMMAtom("O3P", "O"),
+                FakeOpenMMAtom("H3T", "H"),
+                FakeOpenMMAtom("CG2", "C"),
+                FakeOpenMMAtom("HG21", "H"),
+                FakeOpenMMAtom("HG22", "H"),
+                FakeOpenMMAtom("HG23", "H"),
+                FakeOpenMMAtom("C", "C"),
+                FakeOpenMMAtom("O", "O"),
+            ],
+            [
+                (0, 1),
+                (2, 3),
+                (4, 5),
+                (10, 11),
+                (12, 13),
+                (12, 14),
+                (12, 15),
+            ],
+        )
+        forcefield = SimpleNamespace(_templates={"TPO": template})
+
+        variants, hydrogens_added = _charmm_template_hydrogen_variants(
+            FakeOpenMMTopology([residue]),
+            forcefield,
+        )
+
+        self.assertEqual(
+            variants,
+            [
+                [
+                    ("HN", "N"),
+                    ("HA", "CA"),
+                    ("HB", "CB"),
+                    ("H3T", "O3P"),
+                    ("HG21", "CG2"),
+                    ("HG22", "CG2"),
+                    ("HG23", "CG2"),
+                ]
+            ],
+        )
+        self.assertEqual(hydrogens_added[0]["name"], "TPO")
+        self.assertEqual(hydrogens_added[0]["hydrogens"][0], {"name": "HN", "parent": "N"})
+
+    def test_ccd_lookup_uses_cache_without_network(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_dir = Path(tmpdir)
+            cached = cache_dir / "TPO.cif"
+            cached.write_text("data_TPO\n")
+
+            lookup = _lookup_ccd_component("TPO", cache_dir=cache_dir, ccd_online="never")
+
+        self.assertTrue(lookup["available"])
+        self.assertEqual(lookup["source"], "cache")
+        self.assertEqual(lookup["code"], "TPO")
+
+    def test_add_hydrogens_can_skip_minimization_with_mocked_dependencies(self) -> None:
+        class FakeFixer:
+            def __init__(self, filename: str) -> None:
+                self.filename = filename
+                self.topology = object()
+                self.positions = [(0.0, 0.0, 0.0)]
+                self.ph = None
+
+            def addMissingHydrogens(self, ph: float) -> None:
+                self.ph = ph
+
+        class FakePDBFile:
+            @staticmethod
+            def writeFile(topology, positions, handle, keepIds=True) -> None:
+                handle.write("PDB\\n")
+
+        app_module = module(
+            "openmm.app",
+            ForceField=object,
+            HBonds=object(),
+            Modeller=object,
+            NoCutoff=object(),
+            PDBFile=FakePDBFile,
+            Simulation=object,
+        )
+        openmm_module = module(
+            "openmm",
+            __version__="8.test",
+            CustomExternalForce=object,
+            LocalEnergyMinimizer=object,
+            Platform=object,
+            VerletIntegrator=object,
+            unit=SimpleNamespace(picoseconds=1.0, nanometer=1.0),
+            app=app_module,
+        )
+        pdbfixer_module = module("pdbfixer", __version__="1.test", PDBFixer=FakeFixer)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "hydrated.pdb"
+            with mock.patch.dict(
+                sys.modules,
+                {
+                    "openmm": openmm_module,
+                    "openmm.app": app_module,
+                    "pdbfixer": pdbfixer_module,
+                },
+            ):
+                metadata = add_hydrogens_with_pdbfixer(
+                    "input.pdb",
+                    output_path,
+                    ph=6.5,
+                    minimize="none",
+                )
+
+            self.assertEqual(output_path.read_text(), "PDB\\n")
+
+        self.assertEqual(metadata["mode"], "none")
+        self.assertFalse(metadata["ran"])
+        self.assertEqual(metadata["openmm_version"], "8.test")
+        self.assertEqual(metadata["pdbfixer_version"], "1.test")
+
+    def test_add_hydrogens_runs_restrained_minimization_with_mocked_dependencies(self) -> None:
+        class FakeElement:
+            def __init__(self, symbol: str) -> None:
+                self.symbol = symbol
+
+        class FakeAtom:
+            def __init__(self, symbol: str) -> None:
+                self.element = FakeElement(symbol)
+
+        class FakeTopology:
+            def atoms(self):
+                return iter([FakeAtom("N"), FakeAtom("H")])
+
+        class FakeFixer:
+            def __init__(self, filename: str) -> None:
+                self.filename = filename
+                self.topology = FakeTopology()
+                self.positions = [(0.0, 0.0, 0.0), (0.1, 0.0, 0.0)]
+
+            def addMissingHydrogens(self, ph: float) -> None:
+                self.ph = ph
+
+        class FakeForce:
+            last = None
+
+            def __init__(self, expression: str) -> None:
+                self.expression = expression
+                self.particles = []
+                FakeForce.last = self
+
+            def addGlobalParameter(self, name: str, value: float) -> None:
+                self.global_parameter = (name, value)
+
+            def addPerParticleParameter(self, name: str) -> None:
+                pass
+
+            def addParticle(self, index: int, parameters: list[float]) -> None:
+                self.particles.append((index, parameters))
+
+        class FakeSystem:
+            def addForce(self, force) -> None:
+                self.force = force
+
+        class FakeForceField:
+            def __init__(self, *files: str) -> None:
+                self.files = files
+
+            def createSystem(self, topology, nonbondedMethod, constraints):
+                return FakeSystem()
+
+        class FakePlatform:
+            def __init__(self, name: str) -> None:
+                self.name = name
+
+            def getName(self) -> str:
+                return self.name
+
+        class FakePlatformFactory:
+            @staticmethod
+            def getPlatformByName(name: str):
+                if name != "CPU":
+                    raise RuntimeError(name)
+                return FakePlatform(name)
+
+        class FakeState:
+            def getPositions(self):
+                return [(0.0, 0.0, 0.0), (0.11, 0.0, 0.0)]
+
+        class FakeContext:
+            def setPositions(self, positions) -> None:
+                self.positions = positions
+
+            def getState(self, getPositions: bool):
+                return FakeState()
+
+        class FakeSimulation:
+            def __init__(self, topology, system, integrator, platform=None) -> None:
+                self.context = FakeContext()
+                self.platform = platform
+
+        class FakeMinimizer:
+            called_with = None
+
+            @staticmethod
+            def minimize(context, tolerance: float, maxIterations: int) -> None:
+                FakeMinimizer.called_with = (context, tolerance, maxIterations)
+
+        class FakePDBFile:
+            @staticmethod
+            def writeFile(topology, positions, handle, keepIds=True) -> None:
+                handle.write(str(positions))
+
+        app_module = module(
+            "openmm.app",
+            ForceField=FakeForceField,
+            HBonds="HBonds",
+            Modeller=object,
+            NoCutoff="NoCutoff",
+            PDBFile=FakePDBFile,
+            Simulation=FakeSimulation,
+        )
+        openmm_module = module(
+            "openmm",
+            __version__="8.test",
+            CustomExternalForce=FakeForce,
+            LocalEnergyMinimizer=FakeMinimizer,
+            Platform=FakePlatformFactory,
+            VerletIntegrator=lambda step: ("integrator", step),
+            unit=SimpleNamespace(picoseconds=1.0, nanometer=1.0),
+            app=app_module,
+        )
+        pdbfixer_module = module("pdbfixer", __version__="1.test", PDBFixer=FakeFixer)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "hydrated.pdb"
+            with mock.patch.dict(
+                sys.modules,
+                {
+                    "openmm": openmm_module,
+                    "openmm.app": app_module,
+                    "pdbfixer": pdbfixer_module,
+                },
+            ):
+                metadata = add_hydrogens_with_pdbfixer(
+                    "input.pdb",
+                    output_path,
+                    minimize="restrained",
+                )
+
+            self.assertIn("0.11", output_path.read_text())
+
+        self.assertTrue(metadata["ran"])
+        self.assertEqual(metadata["platform"], "CPU")
+        self.assertEqual(metadata["selected_forcefield"], "amber")
+        self.assertEqual(metadata["attempted_forcefields"], ["amber"])
+        self.assertEqual(metadata["max_iterations"], 50)
+        self.assertEqual(FakeForce.last.particles, [(0, [0.0, 0.0, 0.0])])
+        self.assertEqual(FakeMinimizer.called_with[2], 50)
 
     def test_explicit_scoring_smoke_stays_fast_for_sample_pdb(self) -> None:
         start = time.perf_counter()
