@@ -12,6 +12,7 @@ from .backbone_amide import (
     write_csv,
     write_json,
 )
+from .chimerax_writer import write_chimerax
 from .environment_context import CONTEXT_MODE_FAST, CONTEXT_MODE_NONE
 from .hydrogen import (
     CCD_ONLINE_AUTO,
@@ -45,6 +46,9 @@ def main(argv: list[str] | None = None) -> int:
             )
             write_json(result, args.json)
             write_csv(result, args.csv)
+            if args.chimerax is not None:
+                write_chimerax(result, args.chimerax)
+                print(f"Wrote ChimeraX attribute files to {args.chimerax}")
             print(
                 f"Scored {result.counts['hbonds']} HBonds "
                 f"from {result.counts['donors']} donors and "
@@ -95,6 +99,15 @@ def build_parser() -> argparse.ArgumentParser:
     score_parser.add_argument("input_pdb", help="input PDB file")
     score_parser.add_argument("--json", required=True, help="output JSON path")
     score_parser.add_argument("--csv", required=True, help="output CSV path")
+    score_parser.add_argument(
+        "--chimerax",
+        default=None,
+        help=(
+            "directory to write per-residue ChimeraX defattr files plus a helper .cxc script "
+            "(one defattr file per visualisable attribute; residue values come from the "
+            "highest-normalized-score HBond touching that residue)"
+        ),
+    )
     score_parser.add_argument(
         "--atom-types",
         default="N",

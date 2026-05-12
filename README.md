@@ -285,6 +285,90 @@ generated:model:1:chain:A:42:_:H
 Original heavy atom serial numbers from the input PDB are preserved for donor
 and acceptor atoms whenever they can be mapped by chain, residue, and atom name.
 
+### ChimeraX per-residue attribute files
+
+Pass `--chimerax <output_dir>` on the `score` subcommand to additionally write a
+directory of ChimeraX `defattr` attribute files for per-residue visualisation,
+similar to colouring by B-factor:
+
+```bash
+python -m HBOND_CHEMEM score 2erk_h.pdb --hydrogen-mode explicit \
+    --json 2erk_hbonds.json --csv 2erk_hbonds.csv \
+    --chimerax 2erk_chimerax
+```
+
+For each residue that participates (as donor or acceptor) in at least one
+scored HBond, the residue's per-attribute value is taken from the single bond
+touching it with the highest `normalized_score`. Residues with no scored bond
+are omitted.
+
+The directory contains one `.defattr` file per visualisable attribute plus a
+`hbond_chimerax.cxc` helper script:
+
+- `hbond_score.defattr` → ChimeraX attribute `hbondScore`
+- `normalized_score.defattr` → `normalizedScore`
+- `env_h_sasa_fraction.defattr` → `envHSasaFraction`
+- `env_h_solvent_reach_fraction.defattr` → `envHSolventReachFraction`
+- `env_h_packing_count_6p5.defattr` → `envHPackingCount6p5`
+- `env_h_electrostatic.defattr` → `envHElectrostatic`
+- `env_h_hydrophobic.defattr` → `envHHydrophobic`
+- `env_mid_sasa_fraction.defattr` → `envMidSasaFraction`
+- `env_mid_electrostatic.defattr` → `envMidElectrostatic`
+- `env_mid_hydrophobic.defattr` → `envMidHydrophobic`
+
+Under `--context-mode none` the eight `env_*` files are skipped and only the
+two score files plus the `.cxc` helper are written.
+
+To visualise in ChimeraX, open the PDB and then run the helper script from its
+output directory:
+
+```text
+open 2erk_h.pdb
+cd 2erk_chimerax
+open hbond_chimerax.cxc
+```
+
+The helper opens every defattr file and applies an example
+`color byattribute r:hbondScore palette blue-white-red`. Swap `r:hbondScore`
+for any of the other attribute names listed in the script's comments to colour
+by a different attribute.
+
+#### Fixing the colour range
+
+By default, `color byattribute` maps the palette across the data's actual
+min/max, so the same colour can mean different values across structures.
+Append `range min,max` to pin the mapping:
+
+```text
+color byattribute r:hbondScore palette blue-white-red range -6,0
+```
+
+Sensible defaults:
+
+- `r:hbondScore`: `range -6,0` (more negative is stronger; values near zero are weakly favourable);
+- `r:normalizedScore`, `r:envHSasaFraction`, `r:envHSolventReachFraction`, `r:envMidSasaFraction`: `range 0,1`;
+- packing/electrostatic/hydrophobic attributes: omit `range` and let ChimeraX use the data range, or set it from inspection of the CSV.
+
+#### Adding a colour key
+
+Use the `key` command with `colour:label` pairs to draw a legend in the
+graphics window. Stops should match the palette and range:
+
+```text
+key blue:-6 white:-3 red:0  size 0.025,0.4  pos 0.9,0.3  fontSize 14
+```
+
+A typical paired block to drop into the `.cxc` (or run interactively) is:
+
+```text
+color byattribute r:hbondScore palette blue-white-red range -6,0
+key blue:-6 white:-3 red:0  size 0.025,0.4  pos 0.9,0.3  fontSize 14
+```
+
+`pos x,y` is fractional screen position of the key's bottom-left corner;
+`size w,h` is its fractional width and height. Re-run `key` with new stops
+when you switch attributes so the legend tracks the active colouring.
+
 ## Timing
 
 The approximate 1-second target applies to parsing, candidate search, scoring,
